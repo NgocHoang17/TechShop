@@ -1,4 +1,4 @@
-package com.example.techshop
+package com.example.techshop.Activity
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,7 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,7 +30,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,7 +50,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,9 +57,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.ContextCompat.startActivity
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.techshop.Model.CategoryModel
+import com.example.techshop.Model.ItemsModel
 import com.example.techshop.Model.SliderModel
+import com.example.techshop.R
 import com.example.techshop.ViewModel.MainViewModel
-import com.example.techshop.ui.theme.TechShopTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
