@@ -4,7 +4,7 @@ E-commerce app selling tech products.
 Designed with jetpack compose.
 Using Firebase.
 
-## Cài đặt
+## Setting
 
 Clone repository:
 ```bash
