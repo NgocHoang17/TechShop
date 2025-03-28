@@ -59,6 +59,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.9.1")
     implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     implementation ("androidx.compose.foundation:foundation:1.5.0")
+    implementation ("com.google.android.material:material:1.9.0")// Hoặc phiên bản mới nhất
     implementation(libs.firebase.database)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

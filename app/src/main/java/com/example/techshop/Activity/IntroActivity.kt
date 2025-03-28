@@ -72,7 +72,7 @@ fun IntroScreen(onClick: () -> Unit = {}) {
             painter = painterResource(id = R.drawable.intro_logo),
             contentDescription = null,
             modifier = Modifier
-                .padding(top = 48.dp) // Khoảng cách từ trên xuống 48dp
+                .padding(top = 40.dp) // Khoảng cách từ trên xuống 48dp
                 .fillMaxWidth(), // Chiều rộng tối đa
             contentScale = ContentScale.Fit // Giữ nguyên tỉ lệ hình ảnh
         )
@@ -87,7 +87,7 @@ fun IntroScreen(onClick: () -> Unit = {}) {
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(32.dp)) // Khoảng trống 32dp
+        Spacer(modifier = Modifier.height(25.dp)) // Khoảng trống 32dp
 
         // Hiển thị mô tả phụ
         Text(
