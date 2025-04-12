@@ -2,30 +2,18 @@ package com.example.techshop.Activity
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,22 +22,20 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import coil.compose.rememberAsyncImagePainter
 import com.example.techshop.Helper.ChangeNumberItemsListener
 import com.example.techshop.Helper.ManagmentCart
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
+import java.text.NumberFormat
+import java.util.*
 
 class CartActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             CartScreen(
                 ManagmentCart(this),
@@ -58,7 +44,10 @@ class CartActivity : BaseActivity() {
                 })
         }
     }
+}
 
+fun Double.toVND(): String {
+    return NumberFormat.getNumberInstance(Locale("vi", "VN")).format(this) + " ₫"
 }
 
 @Composable
@@ -97,7 +86,6 @@ private fun CartScreen(
                         start.linkTo(parent.start)
                     }
             )
-
         }
         if (cartItems.value.isEmpty()) {
             Text(
@@ -130,44 +118,32 @@ fun CartSummary(itemTotal: Double, tax: Double, delivery: Double) {
             .fillMaxWidth()
             .padding(top = 16.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-        ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
             Text(
                 text = "Item Total:",
                 Modifier.weight(1f),
                 fontWeight = FontWeight.Bold,
                 color = colorResource(R.color.grey)
             )
-            Text(text = "$$itemTotal")
+            Text(text = itemTotal.toVND())
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-        ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
             Text(
                 text = "Tax:",
                 Modifier.weight(1f),
                 fontWeight = FontWeight.Bold,
                 color = colorResource(R.color.grey)
             )
-            Text(text = "$$tax")
+            Text(text = tax.toVND())
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 16.dp)
-        ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 16.dp)) {
             Text(
                 text = "Delivery:",
                 Modifier.weight(1f),
                 fontWeight = FontWeight.Bold,
                 color = colorResource(R.color.grey)
             )
-            Text(text = "$$delivery")
+            Text(text = delivery.toVND())
         }
         Box(
             Modifier
@@ -176,25 +152,20 @@ fun CartSummary(itemTotal: Double, tax: Double, delivery: Double) {
                 .background(colorResource(R.color.grey))
                 .padding(vertical = 8.dp)
         )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-        ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
             Text(
                 text = "Total:",
                 Modifier.weight(1f),
                 fontWeight = FontWeight.Bold,
                 color = colorResource(R.color.grey)
             )
-            Text(text = "$$total")
+            Text(text = total.toVND())
         }
         Button(
             onClick = {},
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor =
-                colorResource(R.color.purple)
+                containerColor = colorResource(R.color.purple)
             ),
             modifier = Modifier
                 .padding(top = 16.dp)
@@ -202,7 +173,7 @@ fun CartSummary(itemTotal: Double, tax: Double, delivery: Double) {
                 .height(50.dp)
         ) {
             Text(
-                text = "Check Out",
+                text = "Thanh toán",
                 fontSize = 18.sp,
                 color = Color.White
             )
@@ -231,7 +202,6 @@ fun CartList(
             )
         }
     }
-
 }
 
 @Composable
@@ -243,7 +213,7 @@ fun CartItem(
     ConstraintLayout(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 8.dp)
+            .padding(vertical = 8.dp)
     ) {
         val (pic, titleTxt, feeEachTime, totalEachItem, Quantity) = createRefs()
         Image(
@@ -271,7 +241,9 @@ fun CartItem(
                 }
                 .padding(start = 8.dp, top = 8.dp)
         )
-        Text(text = "$${item.price}", color = colorResource(R.color.purple),
+        Text(
+            text = item.price.toVND(),
+            color = colorResource(R.color.purple),
             modifier = Modifier
                 .constrainAs(feeEachTime) {
                     start.linkTo(titleTxt.start)
@@ -280,9 +252,10 @@ fun CartItem(
                 .padding(start = 8.dp, top = 8.dp)
         )
         Text(
-            text = "$${item.numberInCart * item.price}",
+            text = (item.numberInCart * item.price).toVND(),
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold, modifier = Modifier
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
                 .constrainAs(totalEachItem) {
                     start.linkTo(titleTxt.start)
                     bottom.linkTo(pic.bottom)
@@ -302,13 +275,12 @@ fun CartItem(
             )
         ) {
             val (plusCartBtn, minusCartBtn, numberItemTxt) = createRefs()
-            Text(text = item.numberInCart.toString(), color = Color.Black,
+            Text(
+                text = item.numberInCart.toString(),
+                color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.constrainAs(numberItemTxt) {
-                    end.linkTo(parent.end)
-                    start.linkTo(parent.start)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
+                    centerTo(parent)
                 }
             )
             Box(modifier = Modifier
@@ -320,8 +292,7 @@ fun CartItem(
                 )
                 .constrainAs(plusCartBtn) {
                     end.linkTo(parent.end)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
+                    centerVerticallyTo(parent)
                 }
                 .clickable {
                     managmentCart.plusItem(
@@ -331,7 +302,6 @@ fun CartItem(
                             override fun onChanged() {
                                 onItemChange()
                             }
-
                         })
                 }
             ) {
@@ -352,8 +322,7 @@ fun CartItem(
                     )
                     .constrainAs(minusCartBtn) {
                         start.linkTo(parent.start)
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
+                        centerVerticallyTo(parent)
                     }
                     .clickable {
                         managmentCart.minusItem(cartItems,
@@ -372,7 +341,6 @@ fun CartItem(
                     textAlign = TextAlign.Center
                 )
             }
-
         }
     }
 }

@@ -52,6 +52,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.techshop.Helper.ManagmentCart
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
+import java.text.NumberFormat
+import java.util.Locale
 
 class DetailActivity : BaseActivity() {
     private lateinit var item: ItemsModel
@@ -161,7 +163,7 @@ fun DetailScreen(
                     .padding(end = 16.dp)
             )
             Text(
-                text = "$${item.price}",
+                text = "${NumberFormat.getNumberInstance(Locale("vi", "VN")).format(item.price)} ₫",
                 fontSize = 22.sp
             )
         }

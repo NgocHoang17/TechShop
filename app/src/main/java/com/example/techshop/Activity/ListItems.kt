@@ -33,6 +33,9 @@ import androidx.core.content.ContextCompat.startActivity
 import coil.compose.AsyncImage
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
+import java.text.NumberFormat
+import java.util.Locale
+
 
 @Composable
 fun ListItems(items: List<ItemsModel>) {
@@ -133,7 +136,7 @@ fun RecommendedItem(items: List<ItemsModel>, pos: Int) {
 
             }
             Text(
-                text = "$${items[pos].price}",
+                text = "${NumberFormat.getNumberInstance(Locale("vi", "VN")).format(items[pos].price)} ₫",
                 color = colorResource(R.color.purple),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
