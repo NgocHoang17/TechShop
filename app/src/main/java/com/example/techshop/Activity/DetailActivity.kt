@@ -2,6 +2,7 @@ package com.example.techshop.Activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +42,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -57,6 +60,7 @@ class DetailActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         item = intent.getParcelableExtra("object")!!
+
         managmentCart = ManagmentCart(this)
 
         setContent {
@@ -134,16 +138,16 @@ fun DetailScreen(
                 )
                 .padding(16.dp)
         )
-//        LazyRow(modifier = Modifier.padding(vertical = 16.dp)) {
-//            items(item.picUrl) { imageUrl ->
-//                ImageThumbnail(
-//                    imageUrl = imageUrl,
-//                    isSelected = selectedImageUrl == imageUrl,
-//                    onClick = { selectedImageUrl = imageUrl }
-//
-//                )
-//            }
-//        }
+        LazyRow(modifier = Modifier.padding(vertical = 16.dp)) {
+            items(item.picUrl) { imageUrl ->
+                ImageThumbnail(
+                    imageUrl = imageUrl,
+                    isSelected = selectedImageUrl == imageUrl,
+                    onClick = { selectedImageUrl = imageUrl }
+
+                )
+            }
+        }
 
         Row(
             verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 16.dp)

@@ -50,7 +50,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation("io.coil-kt:coil-compose:2.2.2") // Check for the latest version
+    implementation("io.coil-kt:coil-compose:2.4.0") // Check for the latest version
     implementation("com.google.accompanist:accompanist-pager-indicators:0.28.0")
     implementation("com.google.accompanist:accompanist-pager:0.28.0") // Check for the latest version// Check for the latest version
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.x.x")
