@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -66,6 +67,9 @@ import com.example.techshop.ViewModel.MainViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -143,12 +147,12 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("Welcome Back", color = Color.Black)
+                        //Text("Welcome Back", color = Color.Black)
 
                         Text(
-                            "Jackie",
-                            color = Color.Black,
-                            fontSize = 18.sp,
+                            "TechShop",
+                            color = Color.DarkGray,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -316,8 +320,21 @@ fun AutoSlidingCarousel(
     pagerState: PagerState = remember { PagerState() },
     banners: List<SliderModel>
 ) {
-
+    val scope = rememberCoroutineScope()
     val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
+
+    // Tự động chuyển banner sau mỗi 5 giây (chỉ khi không kéo tay)
+    LaunchedEffect(key1 = pagerState, key2 = isDragged) {
+        if (!isDragged) {
+            while (true) {
+                delay(5000)
+                val nextPage = (pagerState.currentPage + 1) % banners.size
+                scope.launch {
+                    pagerState.animateScrollToPage(nextPage)
+                }
+            }
+        }
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         HorizontalPager(count = banners.size, state = pagerState) { page ->
@@ -338,11 +355,12 @@ fun AutoSlidingCarousel(
                 .padding(horizontal = 8.dp)
                 .align(Alignment.CenterHorizontally),
             totalDots = banners.size,
-            selectedIndex = if (isDragged) pagerState.currentPage else pagerState.currentPage,
+            selectedIndex = pagerState.currentPage,
             dotSize = 8.dp
         )
     }
 }
+
 
 @Composable
 fun DotIndicator(

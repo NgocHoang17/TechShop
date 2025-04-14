@@ -1,5 +1,6 @@
 package com.example.techshop.Activity
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -30,6 +31,7 @@ import com.example.techshop.Helper.ChangeNumberItemsListener
 import com.example.techshop.Helper.ManagmentCart
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
+import com.example.techshop.utils.toVND
 import java.text.NumberFormat
 import java.util.*
 
@@ -46,9 +48,6 @@ class CartActivity : BaseActivity() {
     }
 }
 
-fun Double.toVND(): String {
-    return NumberFormat.getNumberInstance(Locale("vi", "VN")).format(this) + " ₫"
-}
 
 @Composable
 private fun CartScreen(
@@ -94,7 +93,8 @@ private fun CartScreen(
             )
         } else {
             CartList(
-                cartItems = cartItems.value, managmentCart
+                cartItems = cartItems.value,
+                managmentCart = managmentCart
             ) {
                 cartItems.value = managmentCart.getListCart()
                 calculatorCart(managmentCart, tax)
@@ -103,15 +103,24 @@ private fun CartScreen(
             CartSummary(
                 itemTotal = managmentCart.getTotalFee(),
                 tax = tax.value,
-                delivery = 10.0
+                delivery = 10.0,
+                cartItems = cartItems.value, // Truyền danh sách cartItems
+                managmentCart = managmentCart // Truyền managmentCart
             )
         }
     }
 }
 
 @Composable
-fun CartSummary(itemTotal: Double, tax: Double, delivery: Double) {
+fun CartSummary(
+    itemTotal: Double,
+    tax: Double,
+    delivery: Double,
+    cartItems: List<ItemsModel>,
+    managmentCart: ManagmentCart
+) {
     val total = itemTotal + tax + delivery
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -162,7 +171,12 @@ fun CartSummary(itemTotal: Double, tax: Double, delivery: Double) {
             Text(text = total.toVND())
         }
         Button(
-            onClick = {},
+            onClick = {
+                val intent = Intent(context, PaymentActivity::class.java)
+                intent.putParcelableArrayListExtra("cartItems", ArrayList(cartItems))
+                intent.putExtra("total", total) // Sử dụng total đã tính sẵn
+                context.startActivity(intent)
+            },
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorResource(R.color.purple)
