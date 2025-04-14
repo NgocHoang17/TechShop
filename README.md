@@ -2,7 +2,7 @@
 
 E-commerce app selling tech products.
 Designed with jetpack compose.
-Using Firebase.
+Using Firebase (Realtime database).
 
 ## Setting
 
