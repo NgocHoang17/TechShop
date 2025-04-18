@@ -2,127 +2,137 @@ package com.example.techshop.Activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.view.WindowManager
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.techshop.R
+import com.example.techshop.ui.screen.ForgotPasswordDialog
+import com.example.techshop.ui.screen.LoginScreen
+import com.example.techshop.ui.screen.RegisterScreen
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 
-// Định nghĩa một Activity có tên `IntroActivity` kế thừa từ `BaseActivity`
-@Suppress("DEPRECATION")
 class IntroActivity : BaseActivity() {
+    private lateinit var auth: FirebaseAuth
+    private lateinit var googleSignInClient: GoogleSignInClient
+
+    private val signInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+                auth.signInWithCredential(credential)
+                    .addOnCompleteListener(this) { signInTask ->
+                        if (signInTask.isSuccessful) {
+                            startActivity(Intent(this, MainActivity::class.java))
+                            finish()
+                        } else {
+                            Toast.makeText(
+                                this,
+                                "Đăng nhập Firebase thất bại: ${signInTask.exception?.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            Log.e("GoogleSignIn", "Firebase Auth failed: ${signInTask.exception?.message}", signInTask.exception)
+                        }
+                    }
+            } catch (e: ApiException) {
+                Toast.makeText(
+                    this,
+                    "Lỗi đăng nhập Google: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+                Log.e("GoogleSignIn", "Google Sign-In failed: ${e.statusCode} - ${e.message}", e)
+            }
+        } else {
+            Toast.makeText(
+                this,
+                "Đăng nhập bị hủy hoặc thất bại.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Thiết lập giao diện trạng thái hệ thống
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        auth = FirebaseAuth.getInstance()
 
-        // Thiết lập nội dung của Activity bằng Jetpack Compose
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+        windowInsetsController.isAppearanceLightStatusBars = true
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+
+        if (auth.currentUser != null) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
+
         setContent {
-            IntroScreen(onClick = {
-                // Khi nhấn vào nút "Let's Go", chuyển sang `MainActivity`
-                startActivity(Intent(this, MainActivity::class.java))
-            })
+            var showLogin by remember { mutableStateOf(true) }
+            var showForgotPassword by remember { mutableStateOf(false) }
+
+            if (showLogin) {
+                LoginScreen(
+                    onLoginSuccess = {
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    },
+                    onSwitchToRegister = { showLogin = false },
+                    onForgotPassword = { showForgotPassword = true },
+                    onGoogleSignIn = { signInWithGoogle() }
+                )
+            } else {
+                RegisterScreen(
+                    onRegisterSuccess = {
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    },
+                    onSwitchToLogin = { showLogin = true }
+                )
+            }
+
+            if (showForgotPassword) {
+                ForgotPasswordDialog(
+                    onDismiss = { showForgotPassword = false },
+                    onResetPassword = { email ->
+                        auth.sendPasswordResetEmail(email)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    showForgotPassword = false
+                                } else {
+                                    Toast.makeText(
+                                        this,
+                                        "Gửi email thất bại: ${task.exception?.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                    }
+                )
+            }
         }
     }
-}
 
-// Hàm Compose để hiển thị giao diện màn hình giới thiệu
-@Composable
-@Preview
-fun IntroScreen(onClick: () -> Unit = {}) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize() // Lấp đầy toàn bộ màn hình
-            .background(Color.White) // Đặt nền màu trắng
-            .verticalScroll(rememberScrollState()) // Cho phép cuộn nội dung khi cần
-            .padding(16.dp), // Thêm padding 16dp
-        horizontalAlignment = Alignment.CenterHorizontally // Căn giữa theo chiều ngang
-    ) {
-        // Hiển thị logo giới thiệu
-        Image(
-            painter = painterResource(id = R.drawable.intro_logo),
-            contentDescription = null,
-            modifier = Modifier
-                .padding(top = 40.dp) // Khoảng cách từ trên xuống 48dp
-                .fillMaxWidth(), // Chiều rộng tối đa
-            contentScale = ContentScale.Fit // Giữ nguyên tỉ lệ hình ảnh
-        )
-
-        Spacer(modifier = Modifier.height(32.dp)) // Khoảng trống 32dp
-
-        // Hiển thị tiêu đề giới thiệu
-        Text(
-            text = stringResource(id = R.string.intro_title),
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(25.dp)) // Khoảng trống 32dp
-
-        // Hiển thị mô tả phụ
-        Text(
-            text = stringResource(id = R.string.intro_sub_title),
-            modifier = Modifier.padding(top = 16.dp),
-            color = Color.DarkGray,
-            textAlign = TextAlign.Center,
-            lineHeight = 24.sp
-        )
-
-        // Nút bấm "Let's Go"
-        Button(
-            onClick = { onClick() }, // Gọi hàm `onClick` khi nhấn vào nút
-            modifier = Modifier
-                .padding(horizontal = 32.dp, vertical = 16.dp) // Thêm padding
-                .fillMaxWidth() // Chiều rộng tối đa
-                .height(50.dp), // Chiều cao 50dp
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(R.color.purple) // Màu nền của nút
-            ),
-            shape = RoundedCornerShape(10.dp) // Bo tròn góc 10dp
-        ) {
-            Text(
-                text = stringResource(id = R.string.letgo), // Văn bản hiển thị trên nút
-                color = Color.White, // Màu chữ trắng
-                fontSize = 18.sp
-            )
-        }
-
-        // Hiển thị tùy chọn đăng nhập
-        Text(
-            text = stringResource(id = R.string.sign),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 16.dp),
-            fontSize = 18.sp
-        )
+    private fun signInWithGoogle() {
+        val signInIntent = googleSignInClient.signInIntent
+        signInLauncher.launch(signInIntent)
     }
 }

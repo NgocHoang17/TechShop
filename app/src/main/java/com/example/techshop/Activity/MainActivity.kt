@@ -51,7 +51,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,7 +69,6 @@ import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,12 +77,11 @@ class MainActivity : ComponentActivity() {
             MainActivityScreen {
                 startActivity(Intent(this, CartActivity::class.java))
             }
-
         }
     }
 }
-@Composable
 
+@Composable
 fun MainActivityScreen(onCartClick: () -> Unit) {
     val viewModel = MainViewModel()
     val banners = remember { mutableStateListOf<SliderModel>() }
@@ -94,8 +91,7 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
     var showCategoryLoading by remember { mutableStateOf(true) }
     var showRecommendedLoading by remember { mutableStateOf(true) }
 
-
-    //Banner
+    // Banner
     LaunchedEffect(Unit) {
         viewModel.loadBanners()
         viewModel.banners.observeForever {
@@ -105,7 +101,7 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
         }
     }
 
-    //Category
+    // Category
     LaunchedEffect(Unit) {
         viewModel.loadCategory()
         viewModel.categories.observeForever {
@@ -115,7 +111,7 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
         }
     }
 
-    //Recommended
+    // Recommended
     LaunchedEffect(Unit) {
         viewModel.loadRecommended()
         viewModel.recommended.observeForever {
@@ -125,19 +121,19 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
         }
     }
 
-    ConstraintLayout(modifier = Modifier.background(Color.White)) {
-        val (scrollList, bottomMenu) = createRefs()
+    // Lấy context trong ngữ cảnh @Composable
+    val context = LocalContext.current
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .constrainAs(scrollList) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    end.linkTo(parent.end)
-                    start.linkTo(parent.start)
-                }
+                .padding(bottom = 60.dp)
         ) {
-
             item {
                 Row(
                     modifier = Modifier
@@ -147,8 +143,6 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        //Text("Welcome Back", color = Color.Black)
-
                         Text(
                             "TechShop",
                             color = Color.DarkGray,
@@ -159,19 +153,17 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
                     Row {
                         Image(
                             painter = painterResource(R.drawable.fav_icon),
-                            contentDescription = "",
-
-                            )
+                            contentDescription = ""
+                        )
                         Spacer(modifier = Modifier.width(16.dp))
                         Image(
                             painter = painterResource(R.drawable.search_icon),
-                            contentDescription = "",
+                            contentDescription = ""
                         )
                     }
                 }
             }
 
-            //Banners
             item {
                 if (showBannerLoading) {
                     Box(
@@ -206,7 +198,6 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
             item {
                 SectionTitle("Recommendation", "See All")
             }
-
             item {
                 if (showRecommendedLoading) {
                     Box(
@@ -225,18 +216,49 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
                 Spacer(modifier = Modifier.height(100.dp))
             }
         }
+
         BottomMenu(
             modifier = Modifier
                 .fillMaxWidth()
-                .constrainAs(bottomMenu) {
-                    bottom.linkTo(parent.bottom)
-                },
-            onItemClick = onCartClick
+                .align(Alignment.BottomCenter),
+            onCartClick = onCartClick,
+            onProfileClick = {
+                startActivity(context, Intent(context, ProfileActivity::class.java), null)
+            }
         )
     }
-
 }
 
+@Composable
+fun BottomMenu(
+    modifier: Modifier,
+    onCartClick: () -> Unit,
+    onProfileClick: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .background(
+                colorResource(R.color.purple),
+                shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)
+            )
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceAround
+    ) {
+        BottomMenuItem(icon = painterResource(R.drawable.btn_1), text = "Explorer")
+        BottomMenuItem(
+            icon = painterResource(R.drawable.btn_2),
+            text = "Cart",
+            onItemClick = onCartClick
+        )
+        BottomMenuItem(icon = painterResource(R.drawable.btn_3), text = "Favorite")
+        BottomMenuItem(icon = painterResource(R.drawable.btn_4), text = "Orders")
+        BottomMenuItem(
+            icon = painterResource(R.drawable.btn_5),
+            text = "Profile",
+            onItemClick = onProfileClick
+        )
+    }
+}
 
 @Composable
 fun CategoryList(categories: SnapshotStateList<CategoryModel>) {
@@ -247,7 +269,6 @@ fun CategoryList(categories: SnapshotStateList<CategoryModel>) {
             .fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp)
     ) {
-
         items(categories.size) { index ->
             CategoryItem(item = categories[index],
                 isSelected = selectedIndex == index,
@@ -279,7 +300,6 @@ fun CategoryItem(item: CategoryModel, isSelected: Boolean, onItemClick: () -> Un
         AsyncImage(
             model = (item.picUrl),
             contentDescription = item.title,
-
             modifier = Modifier
                 .size(45.dp)
                 .background(
@@ -302,8 +322,6 @@ fun CategoryItem(item: CategoryModel, isSelected: Boolean, onItemClick: () -> Un
                 modifier = Modifier.padding(end = 8.dp)
             )
         }
-
-
     }
 }
 
@@ -323,7 +341,6 @@ fun AutoSlidingCarousel(
     val scope = rememberCoroutineScope()
     val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
 
-    // Tự động chuyển banner sau mỗi 5 giây (chỉ khi không kéo tay)
     LaunchedEffect(key1 = pagerState, key2 = isDragged) {
         if (!isDragged) {
             while (true) {
@@ -361,7 +378,6 @@ fun AutoSlidingCarousel(
     }
 }
 
-
 @Composable
 fun DotIndicator(
     modifier: Modifier = Modifier,
@@ -381,7 +397,6 @@ fun DotIndicator(
                 color = if (index == selectedIndex) selectedColor else unSelectedColor,
                 size = dotSize
             )
-
             if (index != totalDots - 1) {
                 Spacer(modifier = Modifier.padding(horizontal = 2.dp))
             }
@@ -401,7 +416,6 @@ fun IndicatorDot(
             .clip(CircleShape)
             .background(color)
     )
-
 }
 
 @Composable
@@ -426,34 +440,12 @@ fun SectionTitle(title: String, actionText: String) {
 }
 
 @Composable
-fun BottomMenu(modifier: Modifier, onItemClick: () -> Unit) {
-    Row(
-        modifier = modifier
-            .padding(start = 16.dp, end = 16.dp, bottom = 32.dp)
-            .background(
-                colorResource(R.color.purple),
-                shape = RoundedCornerShape(10.dp)
-            ),
-        horizontalArrangement = Arrangement.SpaceAround
-    ) {
-        BottomMenuItem(icon = painterResource(R.drawable.btn_1), text = "Explorer")
-        BottomMenuItem(
-            icon = painterResource(R.drawable.btn_2),
-            text = "Cart",
-            onItemClick = onItemClick
-        )
-        BottomMenuItem(icon = painterResource(R.drawable.btn_3), text = "Favorite")
-        BottomMenuItem(icon = painterResource(R.drawable.btn_4), text = "Orders")
-        BottomMenuItem(icon = painterResource(R.drawable.btn_5), text = "Profile")
-    }
-}
-
-@Composable
 fun BottomMenuItem(icon: Painter, text: String, onItemClick: (() -> Unit)? = null) {
-    Column(modifier = Modifier
-        .height(60.dp)
-        .clickable { onItemClick?.invoke() }
-        .padding(8.dp),
+    Column(
+        modifier = Modifier
+            .height(60.dp)
+            .clickable { onItemClick?.invoke() }
+            .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -461,7 +453,3 @@ fun BottomMenuItem(icon: Painter, text: String, onItemClick: (() -> Unit)? = nul
         Text(text, color = Color.White, fontSize = 10.sp)
     }
 }
-
-
-
-

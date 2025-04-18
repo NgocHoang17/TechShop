@@ -1,5 +1,8 @@
 <resources>
-    <string name="app_name">project208.2</string>
+    <string name="app_name">TechShop</string>
+
+    <string name="default_web_client_id">889503713064-qcc9bktig2aa2tbl489ah3qqoo15gefv.apps.googleusercontent.com</string>
+
     <string name="intro_title">
         Welcome to <font color="#39c7a5">Digital Store</font>\n
         a <font color="#39c7a5">Gateway</font> to the Latest Tech

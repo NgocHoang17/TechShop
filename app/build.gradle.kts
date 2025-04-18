@@ -52,7 +52,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation("io.coil-kt:coil-compose:2.4.0") // Check for the latest version
     implementation("com.google.accompanist:accompanist-pager-indicators:0.28.0")
-    implementation("com.google.accompanist:accompanist-pager:0.28.0") // Check for the latest version// Check for the latest version
+    implementation("com.google.accompanist:accompanist-pager:0.28.0") // Check for the latest version
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.x.x")
     implementation("androidx.compose.runtime:runtime-livedata:x.x.x")
     implementation("com.github.bumptech.glide:glide:4.12.0")
@@ -65,6 +65,14 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.firebase.auth)
+    implementation ("com.google.android.gms:play-services-auth:20.7.0")
+    implementation ("com.google.firebase:firebase-auth:23.0.0")
+    implementation ("androidx.compose.material:material-icons-core:1.6.8")
+//    implementation(libs.androidx.credentials)
+//    implementation(libs.androidx.credentials.play.services.auth)
+//    implementation(libs.googleid)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
