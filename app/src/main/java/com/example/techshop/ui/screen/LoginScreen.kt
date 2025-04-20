@@ -74,7 +74,7 @@ fun LoginScreen(
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
-                .offset(y = (-397).dp)
+                .offset(y = (-350).dp)
                 .zIndex(0f),
             contentScale = ContentScale.Fit
         )

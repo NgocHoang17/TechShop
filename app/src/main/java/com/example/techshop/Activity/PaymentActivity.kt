@@ -75,12 +75,12 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color.Black
+                            tint = Color.White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = colorResource(R.color.grey) // Purple color
+                    containerColor = colorResource(R.color.purple) // Purple color
                 )
             )
         }
@@ -101,7 +101,8 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFDCE1E3))
             ) {
                 Column(
                     modifier = Modifier
@@ -112,10 +113,14 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                         "Thông tin đơn hàng",
                         fontSize = 20.sp,
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        color = Color(0xFF6200EE)
+                        color = Color(0xFF4A548D)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Tổng tiền: ${total.toVND()}", fontSize = 18.sp, color = Color.Red)
+                    Text(
+                        "Tổng tiền: ${total.toVND()}",
+                        fontSize = 18.sp,
+                        color = Color(0xFFC72216)
+                    )
                 }
             }
 
@@ -127,7 +132,8 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFDCE1E3))
             ) {
                 Column(
                     modifier = Modifier
@@ -138,7 +144,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                         "Thông tin người nhận",
                         fontSize = 18.sp,
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        color = Color(0xFF6200EE)
+                        color = Color(0xFF4A548D)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -153,7 +159,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                         modifier = Modifier.fillMaxWidth(),
                         isError = nameError != null,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF6200EE),
+                            focusedBorderColor = Color(0xFF4A548D),
                             unfocusedBorderColor = Color.Gray
                         )
                     )
@@ -174,7 +180,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                         modifier = Modifier.fillMaxWidth(),
                         isError = addressError != null,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF6200EE),
+                            focusedBorderColor = Color(0xFF4A548D),
                             unfocusedBorderColor = Color.Gray
                         )
                     )
@@ -200,7 +206,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         isError = phoneError != null,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF6200EE),
+                            focusedBorderColor = Color(0xFF4A548D),
                             unfocusedBorderColor = Color.Gray
                         )
                     )
@@ -218,7 +224,8 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFDCE1E3))
             ) {
                 Column(
                     modifier = Modifier
@@ -229,7 +236,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                         "Phương thức thanh toán",
                         fontSize = 18.sp,
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        color = Color(0xFF6200EE)
+                        color = Color(0xFF4A548D)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -244,12 +251,12 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                                     Icon(
                                         imageVector = Icons.Default.ArrowDropDown,
                                         contentDescription = "Dropdown",
-                                        tint = Color(0xFF6200EE)
+                                        tint = Color(0xFF4A548D)
                                     )
                                 }
                             },
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFF6200EE),
+                                focusedBorderColor = Color(0xFF4A548D),
                                 unfocusedBorderColor = Color.Gray
                             )
                         )
@@ -320,7 +327,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                     }
                 },
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.grey)),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.purple)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
