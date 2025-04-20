@@ -83,7 +83,7 @@ fun RegisterScreen(
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                colorResource(R.color.purple).copy(alpha = 0.2f),
+                                colorResource(R.color.purple).copy(alpha = 0.3f),
                                 Color.White
                             )
                         )

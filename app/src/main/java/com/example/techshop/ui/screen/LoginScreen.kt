@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -97,7 +98,7 @@ fun LoginScreen(
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                colorResource(R.color.purple).copy(alpha = 0.2f),
+                                colorResource(R.color.purple).copy(alpha = 0.3f),
                                 Color.White
                             )
                         )
@@ -230,7 +231,7 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Button(
                         onClick = onGoogleSignIn,
@@ -238,14 +239,20 @@ fun LoginScreen(
                             .weight(1f)
                             .height(50.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4285F4)
+                            containerColor = Color.White
                         ),
                         shape = RoundedCornerShape(10.dp),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                     ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_google),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Google",
-                            color = Color.White,
+                            text = "Sign in with Google",
+                            color = Color.Black,
                             fontSize = 16.sp
                         )
                     }
