@@ -103,7 +103,7 @@ private fun CartScreen(
             CartSummary(
                 itemTotal = managmentCart.getTotalFee(),
                 tax = tax.value,
-                delivery = 10.0,
+                delivery = 25000.0,
                 cartItems = cartItems.value, // Truyền danh sách cartItems
                 managmentCart = managmentCart // Truyền managmentCart
             )

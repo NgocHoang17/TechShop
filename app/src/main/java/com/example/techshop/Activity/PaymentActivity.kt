@@ -102,7 +102,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                     .padding(vertical = 8.dp),
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFDCE1E3))
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFDEDFE3))
             ) {
                 Column(
                     modifier = Modifier
@@ -133,7 +133,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                     .padding(vertical = 8.dp),
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFDCE1E3))
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFDEDFE3))
             ) {
                 Column(
                     modifier = Modifier
@@ -225,7 +225,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                     .padding(vertical = 8.dp),
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFDCE1E3))
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFDEDFE3))
             ) {
                 Column(
                     modifier = Modifier

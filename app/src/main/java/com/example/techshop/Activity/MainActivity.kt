@@ -138,7 +138,7 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 48.dp, start = 16.dp, end = 16.dp),
+                        .padding(top = 25.dp, start = 16.dp, end = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -158,7 +158,7 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
                         Spacer(modifier = Modifier.width(16.dp))
                         Image(
                             painter = painterResource(R.drawable.search_icon),
-                            contentDescription = ""
+                            contentDescription = "Tìm kiếm"
                         )
                     }
                 }
@@ -179,7 +179,7 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
                 }
             }
             item {
-                SectionTitle("Categories", "See All")
+                SectionTitle("Danh mục", "")
             }
             item {
                 if (showCategoryLoading) {
@@ -196,7 +196,7 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
                 }
             }
             item {
-                SectionTitle("Recommendation", "See All")
+                SectionTitle("Sản phẩm đề xuất", "")
             }
             item {
                 if (showRecommendedLoading) {
@@ -239,9 +239,9 @@ fun BottomMenu(
         modifier = modifier
             .background(
                 colorResource(R.color.purple),
-                shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)
+                shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
             )
-            .padding(vertical = 8.dp),
+            .padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         BottomMenuItem(icon = painterResource(R.drawable.btn_1), text = "Explorer")
