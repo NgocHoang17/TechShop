@@ -24,11 +24,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.techshop.Helper.ManagmentCart
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
 import com.example.techshop.utils.toVND
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 class PaymentActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,17 +53,15 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
     val methods = listOf("Thanh toán khi nhận hàng", "Chuyển khoản ngân hàng", "Momo")
     var expanded by remember { mutableStateOf(false) }
 
-    // Snackbar state
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // Validation states
     var nameError by remember { mutableStateOf<String?>(null) }
     var addressError by remember { mutableStateOf<String?>(null) }
     var phoneError by remember { mutableStateOf<String?>(null) }
 
-    // Context for Firebase
     val context = LocalContext.current
+    val managmentCart = remember { ManagmentCart(context) }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -70,7 +70,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                 title = { Text("Thanh toán", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = {
-                        (context as? AppCompatActivity)?.finish() // Quay lại màn hình trước đó
+                        (context as? AppCompatActivity)?.finish()
                     }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
@@ -80,7 +80,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = colorResource(R.color.purple) // Purple color
+                    containerColor = colorResource(R.color.purple)
                 )
             )
         }
@@ -95,7 +95,6 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Thông tin đơn hàng
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -126,7 +125,6 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Thông tin người nhận
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -148,7 +146,6 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Tên người nhận
                     OutlinedTextField(
                         value = name.value,
                         onValueChange = {
@@ -169,7 +166,6 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Địa chỉ
                     OutlinedTextField(
                         value = address.value,
                         onValueChange = {
@@ -190,12 +186,11 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Số điện thoại
                     OutlinedTextField(
                         value = phone.value,
                         onValueChange = {
                             phone.value = it
-                            phoneError = if (it.text.isBlank()) {
+                            phoneError = if (phone.value.text.isBlank()) {
                                 "Số điện thoại không được để trống"
                             } else if (!it.text.matches(Regex("^[0-9]{10,11}$"))) {
                                 "Số điện thoại không hợp lệ"
@@ -218,7 +213,6 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Phương thức thanh toán
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -281,10 +275,8 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Nút xác nhận thanh toán
             Button(
                 onClick = {
-                    // Validation
                     nameError = if (name.value.text.isBlank()) "Tên không được để trống" else null
                     addressError = if (address.value.text.isBlank()) "Địa chỉ không được để trống" else null
                     phoneError = if (phone.value.text.isBlank()) {
@@ -294,7 +286,6 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                     } else null
 
                     if (nameError == null && addressError == null && phoneError == null) {
-                        // Lưu vào Firebase
                         val database = FirebaseDatabase.getInstance().reference
                         val orderRef = database.child("orders").push()
                         val order = hashMapOf(
@@ -307,16 +298,20 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                                 mapOf(
                                     "title" to it.title,
                                     "price" to it.price,
-                                    "quantity" to it.numberInCart
+                                    "numberInCart" to it.numberInCart
                                 )
                             },
-                            "timestamp" to System.currentTimeMillis() // Thêm timestamp
+                            "timestamp" to System.currentTimeMillis(),
+                            "status" to "Pending"
                         )
 
                         orderRef.setValue(order)
                             .addOnSuccessListener {
+                                managmentCart.clearCart()
                                 scope.launch {
                                     snackbarHostState.showSnackbar("Đặt hàng thành công!")
+                                    delay(1000)
+                                    (context as? AppCompatActivity)?.finish()
                                 }
                             }
                             .addOnFailureListener { e ->

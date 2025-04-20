@@ -69,6 +69,7 @@ dependencies {
     implementation ("com.google.android.gms:play-services-auth:20.7.0")
     implementation ("com.google.firebase:firebase-auth:23.0.0")
     implementation ("androidx.compose.material:material-icons-core:1.6.8")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3") // Sử dụng phiên bản mới nhất
 //    implementation(libs.androidx.credentials)
 //    implementation(libs.androidx.credentials.play.services.auth)
 //    implementation(libs.googleid)

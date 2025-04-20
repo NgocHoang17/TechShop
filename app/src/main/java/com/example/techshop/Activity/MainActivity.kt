@@ -69,20 +69,35 @@ import com.google.accompanist.pager.PagerState
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 
+// Thêm import cho OrdersActivity
+import com.example.techshop.Activity.OrdersActivity // [THAY ĐỔI]: Thêm import để sử dụng OrdersActivity
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MainActivityScreen {
-                startActivity(Intent(this, CartActivity::class.java))
-            }
+            MainActivityScreen(
+                onCartClick = {
+                    startActivity(Intent(this, CartActivity::class.java))
+                },
+                onProfileClick = { // [THAY ĐỔI]: Thêm callback onProfileClick vào MainActivityScreen
+                    startActivity(Intent(this, ProfileActivity::class.java))
+                },
+                onOrdersClick = { // [THAY ĐỔI]: Thêm callback onOrdersClick để mở OrdersActivity
+                    startActivity(Intent(this, OrdersActivity::class.java))
+                }
+            )
         }
     }
 }
 
 @Composable
-fun MainActivityScreen(onCartClick: () -> Unit) {
+fun MainActivityScreen(
+    onCartClick: () -> Unit,
+    onProfileClick: () -> Unit, // [THAY ĐỔI]: Thêm tham số onProfileClick
+    onOrdersClick: () -> Unit // [THAY ĐỔI]: Thêm tham số onOrdersClick
+) {
     val viewModel = MainViewModel()
     val banners = remember { mutableStateListOf<SliderModel>() }
     val categories = remember { mutableStateListOf<CategoryModel>() }
@@ -222,9 +237,8 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter),
             onCartClick = onCartClick,
-            onProfileClick = {
-                startActivity(context, Intent(context, ProfileActivity::class.java), null)
-            }
+            onProfileClick = onProfileClick,
+            onOrdersClick = onOrdersClick // [THAY ĐỔI]: Truyền callback onOrdersClick vào BottomMenu
         )
     }
 }
@@ -233,7 +247,8 @@ fun MainActivityScreen(onCartClick: () -> Unit) {
 fun BottomMenu(
     modifier: Modifier,
     onCartClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onOrdersClick: () -> Unit // [THAY ĐỔI]: Thêm tham số onOrdersClick
 ) {
     Row(
         modifier = modifier
@@ -251,7 +266,11 @@ fun BottomMenu(
             onItemClick = onCartClick
         )
         BottomMenuItem(icon = painterResource(R.drawable.btn_3), text = "Favorite")
-        BottomMenuItem(icon = painterResource(R.drawable.btn_4), text = "Orders")
+        BottomMenuItem(
+            icon = painterResource(R.drawable.btn_4),
+            text = "Orders",
+            onItemClick = onOrdersClick // [THAY ĐỔI]: Sử dụng callback onOrdersClick thay vì gọi startActivity trực tiếp
+        )
         BottomMenuItem(
             icon = painterResource(R.drawable.btn_5),
             text = "Profile",

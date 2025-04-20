@@ -4,16 +4,17 @@ import android.os.Parcel
 import android.os.Parcelable
 
 data class ItemsModel(
-    var title:String="",
-    var description:String="",
-    var picUrl:ArrayList<String> = ArrayList(),
-    var model:ArrayList<String> = ArrayList(),
-    var price:Double=0.0,
-    var rating:Double=0.0,
-    var numberInCart:Int=0,
-    var showRecommended:Boolean=false,
-    var categoryId:String=""
-): Parcelable {
+    var title: String = "",
+    var description: String = "",
+    var picUrl: ArrayList<String> = ArrayList(),
+    var model: ArrayList<String> = ArrayList(),
+    var price: Double = 0.0,
+    var rating: Double = 0.0,
+    var numberInCart: Int = 0,
+    var showRecommended: Boolean = false,
+    var categoryId: String = "",
+    var timestamp: Long = System.currentTimeMillis() // Thêm timestamp
+) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString().toString(),
         parcel.readString().toString(),
@@ -23,9 +24,9 @@ data class ItemsModel(
         parcel.readDouble(),
         parcel.readInt(),
         parcel.readByte() != 0.toByte(),
-        parcel.readString().toString()
-    ) {
-    }
+        parcel.readString().toString(),
+        parcel.readLong() // Đọc timestamp
+    )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(title)
@@ -37,6 +38,7 @@ data class ItemsModel(
         parcel.writeInt(numberInCart)
         parcel.writeByte(if (showRecommended) 1 else 0)
         parcel.writeString(categoryId)
+        parcel.writeLong(timestamp) // Ghi timestamp
     }
 
     override fun describeContents(): Int {
@@ -52,5 +54,4 @@ data class ItemsModel(
             return arrayOfNulls(size)
         }
     }
-
 }

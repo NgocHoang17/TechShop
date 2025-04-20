@@ -2,8 +2,6 @@ package com.example.techshop.Helper
 
 import android.content.Context
 import android.widget.Toast
-import com.example.techshop.Helper.ChangeNumberItemsListener
-import com.example.techshop.Helper.TinyDB
 import com.example.techshop.Model.ItemsModel
 
 // Lớp ManagmentCart quản lý giỏ hàng cho ứng dụng TechShop
@@ -14,15 +12,17 @@ class ManagmentCart(val context: Context) {
 
     // Hàm thêm sản phẩm vào giỏ hàng
     fun insertItem(item: ItemsModel) {
-        var listFood = getListCart() // Lấy danh sách sản phẩm trong giỏ hàng
+        val listFood = getListCart() // Lấy danh sách sản phẩm trong giỏ hàng
         val existAlready = listFood.any { it.title == item.title } // Kiểm tra sản phẩm đã tồn tại chưa
         val index = listFood.indexOfFirst { it.title == item.title } // Lấy vị trí của sản phẩm nếu đã tồn tại
 
         if (existAlready) {
-            // Nếu sản phẩm đã tồn tại, cập nhật số lượng
+            // Nếu sản phẩm đã tồn tại, cập nhật số lượng và timestamp
             listFood[index].numberInCart = item.numberInCart
+            listFood[index].timestamp = System.currentTimeMillis()
         } else {
             // Nếu chưa tồn tại, thêm sản phẩm mới vào danh sách
+            item.timestamp = System.currentTimeMillis() // Cập nhật timestamp
             listFood.add(item)
         }
         tinyDB.putListObject("CartList", listFood) // Lưu danh sách giỏ hàng vào bộ nhớ
@@ -42,6 +42,7 @@ class ManagmentCart(val context: Context) {
         } else {
             // Giảm số lượng sản phẩm
             listFood[position].numberInCart--
+            listFood[position].timestamp = System.currentTimeMillis() // Cập nhật timestamp
         }
         tinyDB.putListObject("CartList", listFood) // Cập nhật lại giỏ hàng
         listener.onChanged() // Gọi callback để cập nhật UI
@@ -50,6 +51,7 @@ class ManagmentCart(val context: Context) {
     // Hàm tăng số lượng sản phẩm trong giỏ hàng
     fun plusItem(listFood: ArrayList<ItemsModel>, position: Int, listener: ChangeNumberItemsListener) {
         listFood[position].numberInCart++ // Tăng số lượng sản phẩm
+        listFood[position].timestamp = System.currentTimeMillis() // Cập nhật timestamp
         tinyDB.putListObject("CartList", listFood) // Cập nhật lại giỏ hàng
         listener.onChanged() // Gọi callback để cập nhật UI
     }
@@ -63,5 +65,10 @@ class ManagmentCart(val context: Context) {
             fee += item.price * item.numberInCart
         }
         return fee // Trả về tổng giá trị đơn hàng
+    }
+
+    // Hàm xóa toàn bộ giỏ hàng
+    fun clearCart() {
+        tinyDB.remove("CartList") // Xóa key CartList trong TinyDB
     }
 }
