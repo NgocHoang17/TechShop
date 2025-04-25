@@ -31,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,7 +49,9 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
+import com.example.techshop.Helper.FavoriteManager
 import com.example.techshop.Helper.ManagmentCart
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
@@ -74,7 +77,14 @@ class DetailActivity : BaseActivity() {
                     managmentCart.insertItem(item)
                 },
                 onCartClick = {
-                    startActivity(Intent(this,CartActivity::class.java))
+                    startActivity(Intent(this, CartActivity::class.java))
+                },
+                onFavoriteClick = {
+                    if (FavoriteManager.isFavorite(item)) {
+                        FavoriteManager.removeFavorite(item)
+                    } else {
+                        FavoriteManager.addFavorite(item)
+                    }
                 }
             )
         }
@@ -86,11 +96,13 @@ fun DetailScreen(
     item: ItemsModel,
     onBackClick: () -> Unit,
     onAddToCartClick: () -> Unit,
-    onCartClick: () -> Unit
+    onCartClick: () -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     var selectedImageUrl by remember { mutableStateOf(item.picUrl.first()) }
     var selectedModelIndex by remember { mutableStateOf(-1) }
-
+    val isFavorite by FavoriteManager.favoriteItems.collectAsStateWithLifecycle()
+    val isItemFavorite by remember { derivedStateOf { isFavorite.contains(item) } }
 
     Column(
         modifier = Modifier
@@ -99,7 +111,6 @@ fun DetailScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-
         ConstraintLayout(
             modifier = Modifier
                 .padding(top = 36.dp, bottom = 16.dp)
@@ -117,16 +128,21 @@ fun DetailScreen(
                         start.linkTo(parent.start)
                     }
             )
-            Image(
-                painter = painterResource(R.drawable.fav_icon),
-                contentDescription = "",
+            IconButton(
+                onClick = onFavoriteClick,
                 modifier = Modifier
                     .constrainAs(fav) {
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom)
                         end.linkTo(parent.end)
                     }
-            )
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_fav),
+                    contentDescription = "Favorite",
+                    tint = if (isItemFavorite) Color.Red else Color.Gray
+                )
+            }
         }
         Image(
             painter = rememberAsyncImagePainter(model = selectedImageUrl),
@@ -146,7 +162,6 @@ fun DetailScreen(
                     imageUrl = imageUrl,
                     isSelected = selectedImageUrl == imageUrl,
                     onClick = { selectedImageUrl = imageUrl }
-
                 )
             }
         }
@@ -189,8 +204,7 @@ fun DetailScreen(
                 onClick = onAddToCartClick,
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor =
-                    colorResource(R.color.purple)
+                    containerColor = colorResource(R.color.purple)
                 ),
                 modifier = Modifier
                     .weight(1f)
@@ -233,37 +247,38 @@ fun RatingBar(rating: Double) {
             modifier = Modifier.padding(end = 8.dp)
         )
         Text(text = "$rating Rating", style = MaterialTheme.typography.bodyMedium)
-
     }
 }
 
 @Composable
 fun ModelSelector(
-    models: List<String>, selectedModeIndex: Int,
+    models: List<String>,
+    selectedModeIndex: Int,
     onModelSelected: (Int) -> Unit
 ) {
     LazyRow(modifier = Modifier.padding(vertical = 8.dp)) {
         itemsIndexed(models) { index, model ->
-            Box(modifier = Modifier
-                .padding(end = 8.dp)
-                .height(48.dp)
-                .then(
-                    if (index == selectedModeIndex) {
-                        Modifier.border(
-                            1.dp, colorResource(R.color.purple),
-                            RoundedCornerShape(10.dp)
-                        )
-                    } else {
-                        Modifier
-                    }
-                )
-                .background(
-                    if (index == selectedModeIndex) colorResource(R.color.lightPurple) else
-                        colorResource(R.color.lightGrey),
-                    shape = RoundedCornerShape(10.dp)
-                )
-                .clickable { onModelSelected(index) }
-                .padding(horizontal = 16.dp)
+            Box(
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .height(48.dp)
+                    .then(
+                        if (index == selectedModeIndex) {
+                            Modifier.border(
+                                1.dp, colorResource(R.color.purple),
+                                RoundedCornerShape(10.dp)
+                            )
+                        } else {
+                            Modifier
+                        }
+                    )
+                    .background(
+                        if (index == selectedModeIndex) colorResource(R.color.lightPurple) else
+                            colorResource(R.color.lightGrey),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                    .clickable { onModelSelected(index) }
+                    .padding(horizontal = 16.dp)
             ) {
                 Text(
                     text = model,
@@ -274,7 +289,6 @@ fun ModelSelector(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-
         }
     }
 }

@@ -54,12 +54,13 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager-indicators:0.28.0")
     implementation("com.google.accompanist:accompanist-pager:0.28.0") // Check for the latest version
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.x.x")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.0")
     implementation("androidx.compose.runtime:runtime-livedata:x.x.x")
     implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation("com.google.code.gson:gson:2.9.1")
     implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     implementation ("androidx.compose.foundation:foundation:1.5.0")
-    implementation ("com.google.android.material:material:1.9.0")// Hoặc phiên bản mới nhất
+    implementation ("com.google.android.material:material:1.9.0")
     implementation(libs.firebase.database)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

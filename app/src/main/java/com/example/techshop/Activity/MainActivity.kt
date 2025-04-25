@@ -2,8 +2,6 @@ package com.example.techshop.Activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -26,6 +24,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,7 +38,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,8 +54,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.techshop.Helper.FavoriteManager
 import com.example.techshop.Model.CategoryModel
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.Model.SliderModel
@@ -66,11 +66,9 @@ import com.example.techshop.ViewModel.MainViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
-import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
-
-// Thêm import cho OrdersActivity
-import com.example.techshop.Activity.OrdersActivity // [THAY ĐỔI]: Thêm import để sử dụng OrdersActivity
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,11 +79,14 @@ class MainActivity : ComponentActivity() {
                 onCartClick = {
                     startActivity(Intent(this, CartActivity::class.java))
                 },
-                onProfileClick = { // [THAY ĐỔI]: Thêm callback onProfileClick vào MainActivityScreen
+                onProfileClick = {
                     startActivity(Intent(this, ProfileActivity::class.java))
                 },
-                onOrdersClick = { // [THAY ĐỔI]: Thêm callback onOrdersClick để mở OrdersActivity
+                onOrdersClick = {
                     startActivity(Intent(this, OrdersActivity::class.java))
+                },
+                onFavoriteClick = {
+                    startActivity(Intent(this, FavoriteActivity::class.java))
                 }
             )
         }
@@ -95,8 +96,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainActivityScreen(
     onCartClick: () -> Unit,
-    onProfileClick: () -> Unit, // [THAY ĐỔI]: Thêm tham số onProfileClick
-    onOrdersClick: () -> Unit // [THAY ĐỔI]: Thêm tham số onOrdersClick
+    onProfileClick: () -> Unit,
+    onOrdersClick: () -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     val viewModel = MainViewModel()
     val banners = remember { mutableStateListOf<SliderModel>() }
@@ -106,37 +108,45 @@ fun MainActivityScreen(
     var showCategoryLoading by remember { mutableStateOf(true) }
     var showRecommendedLoading by remember { mutableStateOf(true) }
 
-    // Banner
+    // Thêm trạng thái loading cho danh sách yêu thích
+    val favoriteItems by FavoriteManager.favoriteItems.collectAsStateWithLifecycle()
+    var isFavoritesLoaded by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
+        // Tải danh sách yêu thích
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            delay(100) // Đảm bảo FavoriteManager đã khởi tạo
+            isFavoritesLoaded = true
+        } else {
+            isFavoritesLoaded = true // Không cần tải nếu chưa đăng nhập
+        }
+
+        // Tải banners
         viewModel.loadBanners()
-        viewModel.banners.observeForever {
+        viewModel.banners.observeForever { bannerList ->
             banners.clear()
-            banners.addAll(it)
+            banners.addAll(bannerList)
             showBannerLoading = false
         }
-    }
 
-    // Category
-    LaunchedEffect(Unit) {
+        // Tải categories
         viewModel.loadCategory()
-        viewModel.categories.observeForever {
+        viewModel.categories.observeForever { categoryList ->
             categories.clear()
-            categories.addAll(it)
+            categories.addAll(categoryList)
             showCategoryLoading = false
         }
-    }
 
-    // Recommended
-    LaunchedEffect(Unit) {
+        // Tải recommended items
         viewModel.loadRecommended()
-        viewModel.recommended.observeForever {
+        viewModel.recommended.observeForever { recommendedList ->
             recommended.clear()
-            recommended.addAll(it)
+            recommended.addAll(recommendedList)
             showRecommendedLoading = false
         }
     }
 
-    // Lấy context trong ngữ cảnh @Composable
     val context = LocalContext.current
 
     Box(
@@ -189,6 +199,15 @@ fun MainActivityScreen(
                     ) {
                         CircularProgressIndicator()
                     }
+                } else if (banners.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Không có banner")
+                    }
                 } else {
                     Banners(banners)
                 }
@@ -206,6 +225,15 @@ fun MainActivityScreen(
                     ) {
                         CircularProgressIndicator()
                     }
+                } else if (categories.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Không có danh mục")
+                    }
                 } else {
                     CategoryList(categories)
                 }
@@ -214,7 +242,8 @@ fun MainActivityScreen(
                 SectionTitle("Sản phẩm đề xuất", "")
             }
             item {
-                if (showRecommendedLoading) {
+                // Chỉ hiển thị danh sách sản phẩm khi cả recommended và favorites đều được tải
+                if (showRecommendedLoading || !isFavoritesLoaded) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -222,6 +251,15 @@ fun MainActivityScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
+                    }
+                } else if (recommended.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Không có sản phẩm đề xuất")
                     }
                 } else {
                     ListItems(recommended)
@@ -238,7 +276,8 @@ fun MainActivityScreen(
                 .align(Alignment.BottomCenter),
             onCartClick = onCartClick,
             onProfileClick = onProfileClick,
-            onOrdersClick = onOrdersClick // [THAY ĐỔI]: Truyền callback onOrdersClick vào BottomMenu
+            onOrdersClick = onOrdersClick,
+            onFavoriteClick = onFavoriteClick
         )
     }
 }
@@ -248,7 +287,8 @@ fun BottomMenu(
     modifier: Modifier,
     onCartClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onOrdersClick: () -> Unit // [THAY ĐỔI]: Thêm tham số onOrdersClick
+    onOrdersClick: () -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     Row(
         modifier = modifier
@@ -265,11 +305,15 @@ fun BottomMenu(
             text = "Cart",
             onItemClick = onCartClick
         )
-        BottomMenuItem(icon = painterResource(R.drawable.btn_3), text = "Favorite")
+        BottomMenuItem(
+            icon = painterResource(R.drawable.btn_3),
+            text = "Favorite",
+            onItemClick = onFavoriteClick
+        )
         BottomMenuItem(
             icon = painterResource(R.drawable.btn_4),
             text = "Orders",
-            onItemClick = onOrdersClick // [THAY ĐỔI]: Sử dụng callback onOrdersClick thay vì gọi startActivity trực tiếp
+            onItemClick = onOrdersClick
         )
         BottomMenuItem(
             icon = painterResource(R.drawable.btn_5),
@@ -280,27 +324,34 @@ fun BottomMenu(
 }
 
 @Composable
-fun CategoryList(categories: SnapshotStateList<CategoryModel>) {
+fun CategoryList(categories: List<CategoryModel>) {
     var selectedIndex by remember { mutableStateOf(-1) }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     LazyRow(
         modifier = Modifier
-            .fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp),
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp)
     ) {
-        items(categories.size) { index ->
-            CategoryItem(item = categories[index],
+        items(categories) { category ->
+            val index = categories.indexOf(category)
+            CategoryItem(
+                item = category,
                 isSelected = selectedIndex == index,
                 onItemClick = {
                     selectedIndex = index
-                    Handler(Looper.getMainLooper()).postDelayed({
+                    scope.launch {
+                        delay(1000)
                         val intent = Intent(context, ListItemsActivity::class.java).apply {
-                            putExtra("id", categories[index].id.toString())
-                            putExtra("title", categories[index].title)
+                            putExtra("id", category.id.toString())
+                            putExtra("title", category.title)
                         }
                         startActivity(context, intent, null)
-                    }, 1000)
-                })
+                    }
+                }
+            )
         }
     }
 }
@@ -317,7 +368,13 @@ fun CategoryItem(item: CategoryModel, isSelected: Boolean, onItemClick: () -> Un
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = (item.picUrl),
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(item.picUrl)
+                .crossfade(true)
+                .size(100, 100)
+                .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
+                .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+                .build(),
             contentDescription = item.title,
             modifier = Modifier
                 .size(45.dp)
@@ -377,6 +434,10 @@ fun AutoSlidingCarousel(
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(banners[page].url)
+                    .crossfade(true)
+                    .size(300, 150)
+                    .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
+                    .diskCachePolicy(coil.request.CachePolicy.ENABLED)
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
