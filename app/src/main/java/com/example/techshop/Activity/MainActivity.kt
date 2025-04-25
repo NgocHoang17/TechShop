@@ -4,43 +4,31 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
@@ -49,10 +37,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -93,6 +81,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainActivityScreen(
     onCartClick: () -> Unit,
@@ -149,6 +138,10 @@ fun MainActivityScreen(
 
     val context = LocalContext.current
 
+    // Trạng thái hiển thị thanh tìm kiếm
+    var isSearchBarVisible by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -167,23 +160,101 @@ fun MainActivityScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            "TechShop",
-                            color = Color.DarkGray,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    if (isSearchBarVisible) {
+                        // Hiển thị thanh tìm kiếm
+                        AnimatedVisibility(
+                            visible = isSearchBarVisible,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedTextField(
+                                    value = searchQuery,
+                                    onValueChange = { searchQuery = it },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .shadow(4.dp, RoundedCornerShape(12.dp))
+                                        .background(Color.White, RoundedCornerShape(12.dp)),
+                                    placeholder = { Text("Tìm kiếm sản phẩm...") },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Search,
+                                            contentDescription = "Search Icon",
+                                            tint = colorResource(R.color.purple)
+                                        )
+                                    },
+                                    trailingIcon = {
+                                        if (searchQuery.isNotEmpty()) {
+                                            IconButton(onClick = { searchQuery = "" }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Close,
+                                                    contentDescription = "Clear",
+                                                    tint = Color.Gray
+                                                )
+                                            }
+                                        }
+                                    },
+                                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                                        focusedBorderColor = colorResource(R.color.purple),
+                                        unfocusedBorderColor = Color.Gray,
+                                        cursorColor = colorResource(R.color.purple),
+                                        focusedTextColor = Color.Black,
+                                        unfocusedTextColor = Color.Black
+                                    ),
+                                    shape = RoundedCornerShape(12.dp),
+                                    keyboardOptions = KeyboardOptions.Default.copy(
+                                        imeAction = ImeAction.Search
+                                    ),
+                                    keyboardActions = KeyboardActions(
+                                        onSearch = {
+                                            if (searchQuery.isNotEmpty()) {
+                                                val intent = Intent(context, SearchResultsActivity::class.java).apply {
+                                                    putExtra("query", searchQuery)
+                                                }
+                                                context.startActivity(intent)
+                                                searchQuery = "" // Xóa từ khóa sau khi tìm kiếm
+                                                isSearchBarVisible = false // Ẩn thanh tìm kiếm
+                                            }
+                                        }
+                                    ),
+                                    singleLine = true
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                TextButton(onClick = {
+                                    isSearchBarVisible = false
+                                    searchQuery = ""
+                                }) {
+                                    Text(
+                                        text = "Hủy",
+                                        color = colorResource(R.color.purple),
+                                        fontSize = 16.sp
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        // Hiển thị logo TechShop
+                        Column {
+                            Text(
+                                "TechShop",
+                                color = Color.DarkGray,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
-                    Row {
-                        Image(
-                            painter = painterResource(R.drawable.fav_icon),
-                            contentDescription = ""
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
+
+                    if (!isSearchBarVisible) {
                         Image(
                             painter = painterResource(R.drawable.search_icon),
-                            contentDescription = "Tìm kiếm"
+                            contentDescription = "Tìm kiếm",
+                            modifier = Modifier.clickable {
+                                isSearchBarVisible = !isSearchBarVisible
+                                if (!isSearchBarVisible) searchQuery = "" // Xóa từ khóa khi ẩn
+                            }
                         )
                     }
                 }
@@ -242,7 +313,6 @@ fun MainActivityScreen(
                 SectionTitle("Sản phẩm đề xuất", "")
             }
             item {
-                // Chỉ hiển thị danh sách sản phẩm khi cả recommended và favorites đều được tải
                 if (showRecommendedLoading || !isFavoritesLoaded) {
                     Box(
                         modifier = Modifier
