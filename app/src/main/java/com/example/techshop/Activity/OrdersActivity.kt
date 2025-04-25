@@ -1,5 +1,6 @@
 package com.example.techshop.Activity
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,13 +21,18 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.techshop.Model.OrderModel
 import com.example.techshop.R
 import com.example.techshop.ViewModel.OrdersViewModel
 import com.example.techshop.utils.toVND
+import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class OrdersActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,22 +41,33 @@ class OrdersActivity : ComponentActivity() {
             OrdersScreen()
         }
     }
+
+    override fun onBackPressed() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        startActivity(intent)
+        super.onBackPressed()
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrdersScreen() {
-    val viewModel = OrdersViewModel()
-    val orders = remember { mutableStateListOf<OrderModel>() }
+    val viewModel: OrdersViewModel = viewModel()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val orders by viewModel.orders.collectAsStateWithLifecycle(
+        initialValue = emptyList(),
+        lifecycle = lifecycleOwner.lifecycle,
+        minActiveState = Lifecycle.State.STARTED
+    )
     var showLoading by remember { mutableStateOf(true) }
+    val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
 
     LaunchedEffect(Unit) {
-        viewModel.loadOrders()
-        viewModel.orders.observeForever {
-            orders.clear()
-            orders.addAll(it)
-            showLoading = false
+        if (isLoggedIn) {
+            viewModel.loadOrders()
         }
+        showLoading = false
     }
 
     val context = LocalContext.current
@@ -61,6 +78,10 @@ fun OrdersScreen() {
                 title = { Text("Đơn hàng của bạn", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = {
+                        // Gọi cùng logic với onBackPressed
+                        val intent = Intent(context, MainActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        context.startActivity(intent)
                         (context as? ComponentActivity)?.finish()
                     }) {
                         Icon(
@@ -82,26 +103,38 @@ fun OrdersScreen() {
                 .background(Color.White)
                 .padding(padding)
         ) {
-            if (showLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else if (orders.isEmpty()) {
-                Text(
-                    text = "Bạn chưa có đơn hàng nào.",
-                    fontSize = 16.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(orders) { order ->
-                        OrderItem(order)
+            when {
+                showLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                !isLoggedIn -> {
+                    Text(
+                        text = "Vui lòng đăng nhập để xem đơn hàng.",
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                orders.isEmpty() -> {
+                    Text(
+                        text = "Bạn chưa có đơn hàng nào.",
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(orders) { order ->
+                            OrderItem(order)
+                        }
                     }
                 }
             }
@@ -139,7 +172,7 @@ fun OrderItem(order: OrderModel) {
                     color = when (order.status) {
                         "Pending" -> Color.Yellow
                         "Confirmed" -> Color.Blue
-                        "Shipped" -> Color(0xFFFFA500) // Orange
+                        "Shipped" -> Color(0xFFFFA500)
                         "Delivered" -> Color.Green
                         "Cancelled" -> Color.Red
                         else -> Color.Gray
@@ -196,23 +229,23 @@ fun OrderItem(order: OrderModel) {
 
             order.items.forEach { item ->
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "- ${item.title} (x${item.numberInCart})",
-                        fontSize = 14.sp,
-                        color = Color.Black,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = "${item.price * item.numberInCart} VNĐ",
-                        fontSize = 14.sp,
-                        color = Color.Black
-                    )
-                }
+                Text(
+                    text = "- ${item.title} (x${item.numberInCart})",
+                    fontSize = 14.sp,
+                    color = Color.Black,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = "${item.price * item.numberInCart} VNĐ",
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
+            }
             }
 
             Spacer(modifier = Modifier.height(8.dp))

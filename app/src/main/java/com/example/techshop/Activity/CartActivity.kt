@@ -48,7 +48,6 @@ class CartActivity : BaseActivity() {
     }
 }
 
-
 @Composable
 private fun CartScreen(
     managmentCart: ManagmentCart = ManagmentCart(LocalContext.current),
@@ -104,8 +103,8 @@ private fun CartScreen(
                 itemTotal = managmentCart.getTotalFee(),
                 tax = tax.value,
                 delivery = 25000.0,
-                cartItems = cartItems.value, // Truyền danh sách cartItems
-                managmentCart = managmentCart // Truyền managmentCart
+                cartItems = cartItems.value,
+                managmentCart = managmentCart
             )
         }
     }
@@ -174,8 +173,10 @@ fun CartSummary(
             onClick = {
                 val intent = Intent(context, PaymentActivity::class.java)
                 intent.putParcelableArrayListExtra("cartItems", ArrayList(cartItems))
-                intent.putExtra("total", total) // Sử dụng total đã tính sẵn
+                intent.putExtra("total", total)
                 context.startActivity(intent)
+                // Kết thúc CartActivity
+                (context as? AppCompatActivity)?.finish()
             },
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(

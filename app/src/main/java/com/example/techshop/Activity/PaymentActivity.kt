@@ -1,5 +1,6 @@
 package com.example.techshop.Activity
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -19,15 +20,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.techshop.Helper.ManagmentCart
 import com.example.techshop.Model.ItemsModel
+import com.example.techshop.Model.OrderItemModel
+import com.example.techshop.Model.OrderModel
 import com.example.techshop.R
 import com.example.techshop.utils.toVND
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
@@ -62,6 +65,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
 
     val context = LocalContext.current
     val managmentCart = remember { ManagmentCart(context) }
+    val auth = FirebaseAuth.getInstance()
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -286,23 +290,38 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                     } else null
 
                     if (nameError == null && addressError == null && phoneError == null) {
+                        val currentUser = auth.currentUser
+                        if (currentUser == null) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Vui lòng đăng nhập để đặt hàng.")
+                            }
+                            return@Button
+                        }
+
+                        val userId = currentUser.uid
                         val database = FirebaseDatabase.getInstance().reference
                         val orderRef = database.child("orders").push()
-                        val order = hashMapOf(
-                            "name" to name.value.text,
-                            "address" to address.value.text,
-                            "phone" to phone.value.text,
-                            "paymentMethod" to selectedMethod.value,
-                            "total" to total,
-                            "items" to cartItems.map {
-                                mapOf(
-                                    "title" to it.title,
-                                    "price" to it.price,
-                                    "numberInCart" to it.numberInCart
-                                )
-                            },
-                            "timestamp" to System.currentTimeMillis(),
-                            "status" to "Pending"
+                        val orderId = orderRef.key ?: return@Button
+
+                        val orderItems = cartItems.map { item ->
+                            OrderItemModel(
+                                title = item.title,
+                                price = item.price,
+                                numberInCart = item.numberInCart
+                            )
+                        }
+
+                        val order = OrderModel(
+                            orderId = orderId,
+                            userId = userId,
+                            name = name.value.text,
+                            address = address.value.text,
+                            phone = phone.value.text,
+                            paymentMethod = selectedMethod.value,
+                            total = total,
+                            items = orderItems,
+                            timestamp = System.currentTimeMillis(),
+                            status = "Pending"
                         )
 
                         orderRef.setValue(order)
@@ -310,7 +329,11 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
                                 managmentCart.clearCart()
                                 scope.launch {
                                     snackbarHostState.showSnackbar("Đặt hàng thành công!")
-                                    delay(1000)
+                                   // delay(300)
+                                    // Chuyển sang OrdersActivity
+                                    val ordersIntent = Intent(context, OrdersActivity::class.java)
+                                    context.startActivity(ordersIntent)
+                                    // Kết thúc PaymentActivity
                                     (context as? AppCompatActivity)?.finish()
                                 }
                             }

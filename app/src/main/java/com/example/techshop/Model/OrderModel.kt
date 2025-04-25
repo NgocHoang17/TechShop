@@ -9,5 +9,6 @@ data class OrderModel(
     val total: Double = 0.0,
     val items: List<OrderItemModel> = emptyList(),
     val timestamp: Long = 0L, // Thêm timestamp
-    val status: String = "Pending" // Thêm trạng thái
+    val status: String = "Pending", // Thêm trạng thái
+    val userId: String = ""
 )
