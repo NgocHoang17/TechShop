@@ -238,7 +238,8 @@ fun RegisterScreen(
                                         val userData = User(
                                             username = username,
                                             phone = phone,
-                                            email = email
+                                            email = email,
+                                            role = "USER" // Gán mặc định là USER khi đăng ký
                                         )
                                         db.child("users").child(user!!.uid).setValue(userData)
                                             .addOnSuccessListener {

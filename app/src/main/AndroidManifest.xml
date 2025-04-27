@@ -16,6 +16,24 @@
         android:theme="@style/Theme.TechShop"
         tools:targetApi="31">
         <activity
+            android:name=".Admin.ManageUsersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Admin.ManageCategoriesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Admin.ManageOrdersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Admin.AddEditProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Admin.ManageProductsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Admin.AdminMainActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activity.SearchResultsActivity"
             android:exported="false" />
         <activity
