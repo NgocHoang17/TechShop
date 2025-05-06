@@ -133,7 +133,8 @@ class OrdersActivity : ComponentActivity() {
                 Text(
                     text = "Trạng thái: ${order.status ?: "Chưa xác định"}",
                     fontSize = 14.sp,
-                    color = statusColor
+                    color = statusColor,
+                    fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Người nhận: ${order.name}",
