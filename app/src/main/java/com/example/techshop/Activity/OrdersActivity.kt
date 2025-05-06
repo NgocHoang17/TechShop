@@ -103,6 +103,16 @@ class OrdersActivity : ComponentActivity() {
 
     @Composable
     fun OrderCard(order: com.example.techshop.Model.OrderModel) {
+        val statusOptions = listOf("Pending", "Processing", "Shipped", "Delivered", "Cancelled")
+        val statusColor = when (order.status) {
+            "Pending" -> Color(0xFFFFA500) // Cam
+            "Processing" -> Color(0xFFFF9800) // Cam đậm
+            "Shipped" -> Color(0xFF2196F3) // Xanh dương
+            "Delivered" -> Color(0xFF4CAF50) // Xanh lá
+            "Cancelled" -> Color(0xFFF44336) // Đỏ
+            else -> Color.Gray // Mặc định nếu không khớp
+        }
+
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
@@ -120,12 +130,36 @@ class OrdersActivity : ComponentActivity() {
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Text(text = "Trạng thái: ${order.status}")
-                Text(text = "Người nhận: ${order.name}")
-                Text(text = "Địa chỉ: ${order.address}")
-                Text(text = "Số điện thoại: ${order.phone}")
-                Text(text = "Phương thức thanh toán: ${order.paymentMethod}")
-                Text(text = "Thời gian: ${java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(order.timestamp)}")
+                Text(
+                    text = "Trạng thái: ${order.status ?: "Chưa xác định"}",
+                    fontSize = 14.sp,
+                    color = statusColor
+                )
+                Text(
+                    text = "Người nhận: ${order.name}",
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
+                Text(
+                    text = "Địa chỉ: ${order.address}",
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
+                Text(
+                    text = "Số điện thoại: ${order.phone}",
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
+                Text(
+                    text = "Phương thức thanh toán: ${order.paymentMethod}",
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
+                Text(
+                    text = "Thời gian: ${java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(order.timestamp)}",
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
 
                 order.items.forEach { item ->
                     OrderItem(item = item)
