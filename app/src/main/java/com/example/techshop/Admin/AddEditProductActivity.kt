@@ -67,6 +67,7 @@ fun AddEditProductScreen(
     var categoryId by remember { mutableStateOf(product?.categoryId ?: "") }
     var rating by remember { mutableStateOf(product?.rating?.toString() ?: "") }
     var showRecommended by remember { mutableStateOf(product?.showRecommended ?: false) }
+    var imageUrl by remember { mutableStateOf(if (product?.picUrl?.isNotEmpty() == true) product.picUrl[0] else "") }
 
     Scaffold(
         topBar = {
@@ -138,6 +139,12 @@ fun AddEditProductScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
+            OutlinedTextField(
+                value = imageUrl,
+                onValueChange = { imageUrl = it },
+                label = { Text("URL ảnh") },
+                modifier = Modifier.fillMaxWidth()
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -158,7 +165,7 @@ fun AddEditProductScreen(
                         categoryId = categoryId,
                         rating = rating.toDoubleOrNull() ?: 0.0,
                         showRecommended = showRecommended,
-                        picUrl = product?.picUrl ?: arrayListOf(),
+                        picUrl = if (imageUrl.isNotEmpty()) arrayListOf(imageUrl) else arrayListOf(),
                         model = product?.model ?: arrayListOf()
                     )
                     onSave(newProduct)
