@@ -7,37 +7,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.techshop.Admin.AdminMainActivity
+import com.example.techshop.Admin.ManageProductsActivity
 import com.example.techshop.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
@@ -90,6 +69,7 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var verificationId by remember { mutableStateOf("") }
+    var userRole by remember { mutableStateOf("user") } // Thêm state để lưu vai trò
     val context = LocalContext.current
     val database = FirebaseDatabase.getInstance().getReference("users")
 
@@ -100,6 +80,7 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     username = snapshot.child("username").getValue(String::class.java) ?: ""
                     phone = snapshot.child("phone").getValue(String::class.java) ?: ""
+                    userRole = snapshot.child("role").getValue(String::class.java) ?: "user"
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -149,7 +130,7 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
         ) {
             // Ảnh đại diện
             AsyncImage(
-                model = user?.photoUrl ?: "https://via.placeholder.com/150",
+                model = user?.photoUrl ?: "https://cdn-icons-png.flaticon.com/128/3177/3177440.png",
                 contentDescription = "Ảnh đại diện",
                 modifier = Modifier
                     .size(100.dp)
@@ -228,7 +209,8 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
                             val userData = mapOf(
                                 "username" to username,
                                 "phone" to phone,
-                                "email" to user?.email
+                                "email" to user?.email,
+                                "role" to userRole // Giữ nguyên role khi cập nhật
                             )
                             database.child(uid).setValue(userData)
                                 .addOnSuccessListener {
@@ -283,6 +265,32 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Nút chuyển sang chế độ admin (chỉ hiển thị nếu là admin)
+            if (userRole == "ADMIN") {
+                Button(
+                    onClick = {
+                        context.startActivity(Intent(context, AdminMainActivity::class.java))
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.purple),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        text = "Chuyển sang chế độ Quản trị viên",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             // Nút đăng xuất
             Button(

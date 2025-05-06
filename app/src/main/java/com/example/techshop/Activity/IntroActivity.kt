@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.example.techshop.Admin.AdminMainActivity
+import com.example.techshop.R
 import com.example.techshop.ui.screen.ForgotPasswordDialog
 import com.example.techshop.ui.screen.LoginScreen
 import com.example.techshop.ui.screen.RegisterScreen
@@ -35,7 +36,7 @@ class IntroActivity : ComponentActivity() {
 
         // Cấu hình Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("YOUR_WEB_CLIENT_ID")
+            .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
@@ -56,11 +57,8 @@ class IntroActivity : ComponentActivity() {
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val role = snapshot.child("role").getValue(String::class.java) ?: "USER"
-                    if (role == "ADMIN") {
-                        startActivity(Intent(this@IntroActivity, AdminMainActivity::class.java))
-                    } else {
-                        startActivity(Intent(this@IntroActivity, MainActivity::class.java))
-                    }
+                    // Điều hướng tất cả (bao gồm admin) đến MainActivity
+                    startActivity(Intent(this@IntroActivity, MainActivity::class.java))
                     finish()
                 }
 
