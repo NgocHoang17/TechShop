@@ -231,7 +231,7 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
                     .height(48.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.purple),
+                    containerColor = Color.Gray,
                     contentColor = Color.White
                 )
             ) {
@@ -253,7 +253,7 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
                     .height(48.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.purple),
+                    containerColor = Color.Gray,
                     contentColor = Color.White
                 )
             ) {
@@ -278,7 +278,7 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
                         .height(48.dp),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(R.color.purple),
+                        containerColor = Color.Gray,
                         contentColor = Color.White
                     )
                 ) {
@@ -301,7 +301,7 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
                     .height(48.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Gray,
+                    containerColor = colorResource(R.color.purple),
                     contentColor = Color.White
                 )
             ) {

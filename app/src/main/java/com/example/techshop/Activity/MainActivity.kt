@@ -369,7 +369,7 @@ fun BottomMenu(
             .padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceAround
     ) {
-        BottomMenuItem(icon = painterResource(R.drawable.btn_1), text = "Explorer")
+        //BottomMenuItem(icon = painterResource(R.drawable.btn_1), text = "Explorer")
         BottomMenuItem(
             icon = painterResource(R.drawable.btn_2),
             text = "Cart",

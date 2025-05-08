@@ -246,7 +246,7 @@ fun RatingBar(rating: Double) {
             contentDescription = null,
             modifier = Modifier.padding(end = 8.dp)
         )
-        Text(text = "$rating Rating", style = MaterialTheme.typography.bodyMedium)
+        Text(text = "$rating ", style = MaterialTheme.typography.bodyMedium)
     }
 }
 
