@@ -6,8 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -24,6 +26,8 @@ import androidx.compose.ui.unit.sp
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
 import com.google.firebase.database.FirebaseDatabase
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 
 class AddEditProductActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,9 +65,12 @@ fun AddEditProductScreen(
     onBackClick: () -> Unit,
     onSave: (ItemsModel) -> Unit
 ) {
+    val formatSymbols = DecimalFormatSymbols().apply { groupingSeparator = '.' }
+    val formatter = DecimalFormat("#,###", formatSymbols)
+
     var title by remember { mutableStateOf(product?.title ?: "") }
     var description by remember { mutableStateOf(product?.description ?: "") }
-    var price by remember { mutableStateOf(product?.price?.toString() ?: "") }
+    var price by remember { mutableStateOf(product?.price?.let { formatter.format(it) } ?: "") }
     var categoryId by remember { mutableStateOf(product?.categoryId ?: "") }
     var rating by remember { mutableStateOf(product?.rating?.toString() ?: "") }
     var showRecommended by remember { mutableStateOf(product?.showRecommended ?: false) }
@@ -104,7 +111,8 @@ fun AddEditProductScreen(
                 .fillMaxSize()
                 .background(Color.White)
                 .padding(paddingValues)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             OutlinedTextField(
@@ -121,8 +129,11 @@ fun AddEditProductScreen(
             )
             OutlinedTextField(
                 value = price,
-                onValueChange = { price = it },
-                label = { Text("Giá") },
+                onValueChange = { input ->
+                    // Chặn ký tự không phải số và dấu chấm
+                    price = input.filter { it.isDigit() || it == '.' }
+                },
+                label = { Text("Giá (VD: 10.000.000)") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -157,11 +168,12 @@ fun AddEditProductScreen(
             }
             Button(
                 onClick = {
+                    val parsedPrice = price.replace(".", "").toDoubleOrNull() ?: 0.0
                     val newProduct = ItemsModel(
                         id = product?.id ?: "",
                         title = title,
                         description = description,
-                        price = price.toDoubleOrNull() ?: 0.0,
+                        price = parsedPrice,
                         categoryId = categoryId,
                         rating = rating.toDoubleOrNull() ?: 0.0,
                         showRecommended = showRecommended,

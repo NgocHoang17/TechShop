@@ -24,6 +24,22 @@ import com.example.techshop.Helper.FavoriteManager
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
 
+// Hàm định dạng giá thủ công với dấu chấm phân cách hàng nghìn
+fun formatPrice(value: Double): String {
+    val longValue = value.toLong() // Chuyển Double thành Long để tránh lỗi làm tròn
+    if (longValue == 0L) return "0 ₫"
+    val str = longValue.toString()
+    val length = str.length
+    var result = ""
+    for (i in length - 1 downTo 0) {
+        result = str[i] + result
+        if (i > 0 && (length - i) % 3 == 0) {
+            result = ".$result"
+        }
+    }
+    return "$result ₫"
+}
+
 @Composable
 fun ListItems(
     modifier: Modifier = Modifier,
@@ -71,34 +87,6 @@ fun RecommendedItem(item: ItemsModel, onClick: (ItemsModel) -> Unit) {
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-
-//                Box(
-//                    modifier = Modifier
-//                        .align(Alignment.TopEnd)
-//                        .padding(8.dp)
-//                        .size(30.dp)
-//                        .clip(CircleShape)
-//                        .background(Color.White),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    val isItemFavorite = FavoriteManager.isFavorite(item)
-//                    IconButton(
-//                        onClick = {
-//                            if (isItemFavorite) {
-//                                FavoriteManager.removeFavorite(item)
-//                            } else {
-//                                FavoriteManager.addFavorite(item)
-//                            }
-//                        }
-//                    ) {
-//                        Icon(
-//                            painter = painterResource(R.drawable.ic_fav),
-//                            contentDescription = "Favorite",
-//                            tint = if (isItemFavorite) Color.Red else Color.Gray,
-//                            modifier = Modifier.size(20.dp)
-//                        )
-//                    }
-//                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -113,7 +101,7 @@ fun RecommendedItem(item: ItemsModel, onClick: (ItemsModel) -> Unit) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "${item.price} ₫",
+                text = formatPrice(item.price), // Sử dụng hàm formatPrice để định dạng giá
                 fontSize = 14.sp,
                 color = colorResource(id = R.color.purple),
                 fontWeight = FontWeight.SemiBold

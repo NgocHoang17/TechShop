@@ -118,7 +118,7 @@ fun AdminMainScreen(
                     .height(48.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Gray,
+                    containerColor = colorResource(R.color.purple),
                     contentColor = Color.White
                 )
             ) {

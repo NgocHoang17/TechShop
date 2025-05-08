@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
-import com.example.techshop.ui.components.ListItems // note
+import com.example.techshop.ui.components.ListItems
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -59,8 +59,9 @@ fun ManageProductsScreen(
     var products by remember { mutableStateOf(listOf<ItemsModel>()) }
     var isLoading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(Unit) {
-        database.addListenerForSingleValueEvent(object : ValueEventListener {
+    // Tạo listener để theo dõi thay đổi thời gian thực
+    val valueEventListener = remember {
+        object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val productList = mutableListOf<ItemsModel>()
                 for (childSnapshot in snapshot.children) {
@@ -76,7 +77,15 @@ fun ManageProductsScreen(
             override fun onCancelled(error: DatabaseError) {
                 isLoading = false
             }
-        })
+        }
+    }
+
+    // Sử dụng DisposableEffect để quản lý vòng đời của listener
+    DisposableEffect(Unit) {
+        database.addValueEventListener(valueEventListener)
+        onDispose {
+            database.removeEventListener(valueEventListener)
+        }
     }
 
     Scaffold(
@@ -117,8 +126,6 @@ fun ManageProductsScreen(
             )
         },
         containerColor = Color.White
-
-
     ) { paddingValues ->
         Box(
             modifier = Modifier
