@@ -593,7 +593,7 @@ fun SectionTitle(title: String, actionText: String) {
 fun BottomMenuItem(icon: Painter, text: String, onItemClick: (() -> Unit)? = null) {
     Column(
         modifier = Modifier
-            .height(60.dp)
+            .height(50.dp)
             .clickable { onItemClick?.invoke() }
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

@@ -78,6 +78,7 @@ class DetailActivity : BaseActivity() {
                 },
                 onCartClick = {
                     startActivity(Intent(this, CartActivity::class.java))
+                    finish()
                 },
                 onFavoriteClick = {
                     if (FavoriteManager.isFavorite(item)) {
