@@ -1,6 +1,7 @@
 package com.example.techshop.Admin
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,9 +42,11 @@ fun ManageUsersScreen(onBackClick: () -> Unit) {
     val database = FirebaseDatabase.getInstance().getReference("users")
     var users by remember { mutableStateOf(listOf<Pair<String, User>>()) }
     var isLoading by remember { mutableStateOf(true) }
+    val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        database.addListenerForSingleValueEvent(object : ValueEventListener {
+    // Sử dụng DisposableEffect để quản lý listener
+    DisposableEffect(Unit) {
+        val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val userList = mutableListOf<Pair<String, User>>()
                 for (childSnapshot in snapshot.children) {
@@ -57,8 +61,13 @@ fun ManageUsersScreen(onBackClick: () -> Unit) {
 
             override fun onCancelled(error: DatabaseError) {
                 isLoading = false
+                Toast.makeText(context, "Lỗi tải người dùng: ${error.message}", Toast.LENGTH_SHORT).show()
             }
-        })
+        }
+        database.addValueEventListener(valueEventListener)
+        onDispose {
+            database.removeEventListener(valueEventListener)
+        }
     }
 
     Scaffold(
@@ -127,7 +136,9 @@ fun UserItem(userPair: Pair<String, User>) {
     val userId = userPair.first
     val user = userPair.second
     var selectedRole by remember { mutableStateOf(user.role) }
+    var expanded by remember { mutableStateOf(false) }
     val database = FirebaseDatabase.getInstance().getReference("users")
+    val context = LocalContext.current
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -162,8 +173,8 @@ fun UserItem(userPair: Pair<String, User>) {
             ) {
                 val roleOptions = listOf("USER", "ADMIN")
                 ExposedDropdownMenuBox(
-                    expanded = false,
-                    onExpandedChange = {},
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded },
                     modifier = Modifier.weight(1f)
                 ) {
                     OutlinedTextField(
@@ -172,15 +183,15 @@ fun UserItem(userPair: Pair<String, User>) {
                         readOnly = true,
                         label = { Text("Vai trò") },
                         trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = false)
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                         },
                         modifier = Modifier
                             .menuAnchor()
                             .fillMaxWidth()
                     )
                     ExposedDropdownMenu(
-                        expanded = false,
-                        onDismissRequest = {}
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
                     ) {
                         roleOptions.forEach { role ->
                             DropdownMenuItem(
@@ -188,6 +199,13 @@ fun UserItem(userPair: Pair<String, User>) {
                                 onClick = {
                                     selectedRole = role
                                     database.child(userId).child("role").setValue(role)
+                                        .addOnSuccessListener {
+                                            Toast.makeText(context, "Cập nhật vai trò thành công", Toast.LENGTH_SHORT).show()
+                                        }
+                                        .addOnFailureListener {
+                                            Toast.makeText(context, "Cập nhật vai trò thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    expanded = false
                                 }
                             )
                         }

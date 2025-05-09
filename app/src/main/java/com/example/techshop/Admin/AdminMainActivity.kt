@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.techshop.Activity.IntroActivity
+import com.example.techshop.Activity.ProfileActivity
 import com.example.techshop.R
 import com.google.firebase.auth.FirebaseAuth
 
@@ -33,9 +34,6 @@ class AdminMainActivity : ComponentActivity() {
                     startActivity(Intent(this, IntroActivity::class.java))
                     finishAffinity()
                 },
-//                onManageProducts = {
-//                    startActivity(Intent(this, ManageProductsActivity::class.java))
-//                },
                 onManageOrders = {
                     startActivity(Intent(this, ManageOrdersActivity::class.java))
                 },
@@ -46,7 +44,7 @@ class AdminMainActivity : ComponentActivity() {
                     startActivity(Intent(this, ManageUsersActivity::class.java))
                 },
                 onBackClick = {
-                    startActivity(Intent(this, IntroActivity::class.java))
+                    startActivity(Intent(this, ProfileActivity::class.java))
                     finish()
                 }
             )
@@ -58,7 +56,6 @@ class AdminMainActivity : ComponentActivity() {
 @Composable
 fun AdminMainScreen(
     onLogout: () -> Unit,
-    //onManageProducts: () -> Unit,
     onManageOrders: () -> Unit,
     onManageCategories: () -> Unit,
     onManageUsers: () -> Unit,
@@ -103,7 +100,6 @@ fun AdminMainScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            //AdminOptionCard("Quản lý sản phẩm", onClick = onManageProducts)
             AdminOptionCard("Quản lý danh mục & sản phẩm", onClick = onManageCategories)
             AdminOptionCard("Quản lý đơn hàng", onClick = onManageOrders)
             AdminOptionCard("Quản lý người dùng", onClick = onManageUsers)

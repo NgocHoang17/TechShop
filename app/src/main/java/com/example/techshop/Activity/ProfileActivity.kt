@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.techshop.Admin.AdminMainActivity
-//import com.example.techshop.Admin.ManageProductsActivity
 import com.example.techshop.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
@@ -231,8 +230,8 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
                     .height(48.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Gray,
-                    contentColor = Color.White
+                    containerColor = colorResource(R.color.lightGrey2),
+                    contentColor = Color.Black
                 )
             ) {
                 Text(
@@ -253,8 +252,8 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
                     .height(48.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Gray,
-                    contentColor = Color.White
+                    containerColor = colorResource(R.color.lightGrey2),
+                    contentColor = Color.Black
                 )
             ) {
                 Text(
@@ -278,8 +277,8 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
                         .height(48.dp),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Gray,
-                        contentColor = Color.White
+                        containerColor = colorResource(R.color.lightGrey2),
+                        contentColor = Color.Black
                     )
                 ) {
                     Text(
