@@ -1,5 +1,6 @@
 package com.example.techshop.Admin
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,18 +44,21 @@ class ManageCategoriesActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageCategoriesScreen(onBackClick: () -> Unit) {
-    val database = FirebaseDatabase.getInstance().getReference("Category")
+    val database = FirebaseDatabase.getInstance()
+    val categoryRef = database.getReference("Category")
     var categories by remember { mutableStateOf(listOf<CategoryModel>()) }
     var isLoading by remember { mutableStateOf(true) }
-    var showAddDialog by remember { mutableStateOf(false) }
+    var showAddCategoryDialog by remember { mutableStateOf(false) }
+    var showEditCategoryDialog by remember { mutableStateOf(false) }
     var newCategoryTitle by remember { mutableStateOf("") }
     var newCategoryId by remember { mutableStateOf("") }
     var newCategoryPicUrl by remember { mutableStateOf("") }
+    var editCategory by remember { mutableStateOf<CategoryModel?>(null) }
     val context = LocalContext.current
 
-    // Sử dụng DisposableEffect để thiết lập listener và cập nhật dữ liệu
+    // Listener cho danh mục
     DisposableEffect(Unit) {
-        val valueEventListener = object : ValueEventListener {
+        val categoryListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val categoryList = mutableListOf<CategoryModel>()
                 for (childSnapshot in snapshot.children) {
@@ -68,14 +73,11 @@ fun ManageCategoriesScreen(onBackClick: () -> Unit) {
 
             override fun onCancelled(error: DatabaseError) {
                 isLoading = false
+                Toast.makeText(context, "Lỗi tải danh mục: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         }
-        // Thêm listener để theo dõi thay đổi thời gian thực
-        database.addValueEventListener(valueEventListener)
-        // Xóa listener khi composable bị hủy để tránh rò rỉ bộ nhớ
-        onDispose {
-            database.removeEventListener(valueEventListener)
-        }
+        categoryRef.addValueEventListener(categoryListener)
+        onDispose { categoryRef.removeEventListener(categoryListener) }
     }
 
     Scaffold(
@@ -101,7 +103,7 @@ fun ManageCategoriesScreen(onBackClick: () -> Unit) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showAddDialog = true }) {
+                    IconButton(onClick = { showAddCategoryDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Thêm danh mục",
@@ -139,10 +141,24 @@ fun ManageCategoriesScreen(onBackClick: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(categories.size) { index ->
+                        val category = categories[index]
                         CategoryItem(
-                            category = categories[index],
+                            category = category,
+                            onClick = {
+                                val intent = Intent(context, ManageProductsByCategoryActivity::class.java)
+                                intent.putExtra("CATEGORY_ID", category.id.toString())
+                                intent.putExtra("CATEGORY_TITLE", category.title)
+                                context.startActivity(intent)
+                            },
                             onDelete = {
-                                database.child(categories[index].id.toString()).removeValue()
+                                categoryRef.child(category.id.toString()).removeValue()
+                            },
+                            onEdit = {
+                                editCategory = category
+                                newCategoryTitle = category.title
+                                newCategoryId = category.id.toString()
+                                newCategoryPicUrl = category.picUrl
+                                showEditCategoryDialog = true
                             }
                         )
                     }
@@ -151,9 +167,10 @@ fun ManageCategoriesScreen(onBackClick: () -> Unit) {
         }
     }
 
-    if (showAddDialog) {
+    // Dialog thêm danh mục
+    if (showAddCategoryDialog) {
         AlertDialog(
-            onDismissRequest = { showAddDialog = false },
+            onDismissRequest = { showAddCategoryDialog = false },
             title = { Text("Thêm danh mục mới", fontWeight = FontWeight.Bold) },
             text = {
                 Column {
@@ -188,10 +205,10 @@ fun ManageCategoriesScreen(onBackClick: () -> Unit) {
                                 id = newCategoryId.toIntOrNull() ?: 0,
                                 picUrl = newCategoryPicUrl
                             )
-                            database.child(newCategoryId).setValue(newCategory)
+                            categoryRef.child(newCategoryId).setValue(newCategory)
                                 .addOnSuccessListener {
                                     Toast.makeText(context, "Thêm danh mục thành công", Toast.LENGTH_SHORT).show()
-                                    showAddDialog = false
+                                    showAddCategoryDialog = false
                                 }
                                 .addOnFailureListener {
                                     Toast.makeText(context, "Thêm danh mục thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
@@ -209,7 +226,74 @@ fun ManageCategoriesScreen(onBackClick: () -> Unit) {
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAddDialog = false }) {
+                TextButton(onClick = { showAddCategoryDialog = false }) {
+                    Text("Hủy")
+                }
+            }
+        )
+    }
+
+    // Dialog sửa danh mục
+    if (showEditCategoryDialog && editCategory != null) {
+        AlertDialog(
+            onDismissRequest = { showEditCategoryDialog = false },
+            title = { Text("Sửa danh mục", fontWeight = FontWeight.Bold) },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = newCategoryTitle,
+                        onValueChange = { newCategoryTitle = it },
+                        label = { Text("Tên danh mục") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = newCategoryId,
+                        onValueChange = { newCategoryId = it },
+                        label = { Text("ID danh mục") },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = false
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = newCategoryPicUrl,
+                        onValueChange = { newCategoryPicUrl = it },
+                        label = { Text("URL hình ảnh") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (newCategoryTitle.isNotEmpty()) {
+                            val updatedCategory = CategoryModel(
+                                title = newCategoryTitle,
+                                id = newCategoryId.toIntOrNull() ?: 0,
+                                picUrl = newCategoryPicUrl
+                            )
+                            categoryRef.child(newCategoryId).setValue(updatedCategory)
+                                .addOnSuccessListener {
+                                    Toast.makeText(context, "Sửa danh mục thành công", Toast.LENGTH_SHORT).show()
+                                    showEditCategoryDialog = false
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(context, "Sửa danh mục thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
+                                }
+                        } else {
+                            Toast.makeText(context, "Vui lòng nhập tên danh mục", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.purple),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Lưu")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditCategoryDialog = false }) {
                     Text("Hủy")
                 }
             }
@@ -218,7 +302,12 @@ fun ManageCategoriesScreen(onBackClick: () -> Unit) {
 }
 
 @Composable
-fun CategoryItem(category: CategoryModel, onDelete: () -> Unit) {
+fun CategoryItem(
+    category: CategoryModel,
+    onClick: () -> Unit,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
@@ -230,6 +319,7 @@ fun CategoryItem(category: CategoryModel, onDelete: () -> Unit) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { onClick() }
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -246,12 +336,21 @@ fun CategoryItem(category: CategoryModel, onDelete: () -> Unit) {
                     color = Color.Gray
                 )
             }
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Xóa danh mục",
-                    tint = Color.Red
-                )
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Sửa danh mục",
+                        tint = colorResource(R.color.purple)
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Xóa danh mục",
+                        tint = Color.Red
+                    )
+                }
             }
         }
     }

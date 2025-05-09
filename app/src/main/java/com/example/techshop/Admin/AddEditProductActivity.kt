@@ -33,9 +33,11 @@ class AddEditProductActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val product = intent.getParcelableExtra<ItemsModel>("PRODUCT")
+        val categoryId = intent.getStringExtra("CATEGORY_ID")
         setContent {
             AddEditProductScreen(
                 product = product,
+                categoryId = categoryId,
                 onBackClick = { finish() },
                 onSave = { updatedProduct ->
                     saveProduct(updatedProduct)
@@ -62,6 +64,7 @@ class AddEditProductActivity : ComponentActivity() {
 @Composable
 fun AddEditProductScreen(
     product: ItemsModel?,
+    categoryId: String?,
     onBackClick: () -> Unit,
     onSave: (ItemsModel) -> Unit
 ) {
@@ -71,7 +74,7 @@ fun AddEditProductScreen(
     var title by remember { mutableStateOf(product?.title ?: "") }
     var description by remember { mutableStateOf(product?.description ?: "") }
     var price by remember { mutableStateOf(product?.price?.let { formatter.format(it) } ?: "") }
-    var categoryId by remember { mutableStateOf(product?.categoryId ?: "") }
+    var categoryIdState by remember { mutableStateOf(product?.categoryId ?: (categoryId ?: "")) }
     var rating by remember { mutableStateOf(product?.rating?.toString() ?: "") }
     var showRecommended by remember { mutableStateOf(product?.showRecommended ?: false) }
     var imageUrl by remember { mutableStateOf(if (product?.picUrl?.isNotEmpty() == true) product.picUrl[0] else "") }
@@ -130,7 +133,6 @@ fun AddEditProductScreen(
             OutlinedTextField(
                 value = price,
                 onValueChange = { input ->
-                    // Chặn ký tự không phải số và dấu chấm
                     price = input.filter { it.isDigit() || it == '.' }
                 },
                 label = { Text("Giá (VD: 10.000.000)") },
@@ -138,10 +140,11 @@ fun AddEditProductScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
-                value = categoryId,
-                onValueChange = { categoryId = it },
+                value = categoryIdState,
+                onValueChange = { categoryIdState = it },
                 label = { Text("ID danh mục") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = product == null && categoryId != null // Chỉ cho phép chỉnh sửa nếu là sản phẩm mới
             )
             OutlinedTextField(
                 value = rating,
@@ -174,7 +177,7 @@ fun AddEditProductScreen(
                         title = title,
                         description = description,
                         price = parsedPrice,
-                        categoryId = categoryId,
+                        categoryId = categoryIdState,
                         rating = rating.toDoubleOrNull() ?: 0.0,
                         showRecommended = showRecommended,
                         picUrl = if (imageUrl.isNotEmpty()) arrayListOf(imageUrl) else arrayListOf(),

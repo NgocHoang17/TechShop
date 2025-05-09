@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.techshop.Admin.AdminMainActivity
-import com.example.techshop.Admin.ManageProductsActivity
+//import com.example.techshop.Admin.ManageProductsActivity
 import com.example.techshop.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential

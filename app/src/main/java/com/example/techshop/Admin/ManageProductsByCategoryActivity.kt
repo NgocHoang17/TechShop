@@ -29,14 +29,20 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-class ManageProductsActivity : ComponentActivity() {
+class ManageProductsByCategoryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val categoryId = intent.getStringExtra("CATEGORY_ID")
+        val categoryTitle = intent.getStringExtra("CATEGORY_TITLE") ?: "Sản phẩm"
         setContent {
-            ManageProductsScreen(
+            ManageProductsByCategoryScreen(
+                categoryId = categoryId,
+                categoryTitle = categoryTitle,
                 onBackClick = { finish() },
                 onAddProduct = {
-                    startActivity(Intent(this, AddEditProductActivity::class.java))
+                    startActivity(Intent(this, AddEditProductActivity::class.java).apply {
+                        putExtra("CATEGORY_ID", categoryId)
+                    })
                 },
                 onEditProduct = { product ->
                     val intent = Intent(this, AddEditProductActivity::class.java)
@@ -50,7 +56,9 @@ class ManageProductsActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ManageProductsScreen(
+fun ManageProductsByCategoryScreen(
+    categoryId: String?,
+    categoryTitle: String,
     onBackClick: () -> Unit,
     onAddProduct: () -> Unit,
     onEditProduct: (ItemsModel) -> Unit
@@ -70,7 +78,11 @@ fun ManageProductsScreen(
                         productList.add(product.copy(id = childSnapshot.key ?: ""))
                     }
                 }
-                products = productList
+                products = if (categoryId != null) {
+                    productList.filter { it.categoryId == categoryId }
+                } else {
+                    productList
+                }
                 isLoading = false
             }
 
@@ -93,7 +105,7 @@ fun ManageProductsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Quản lý sản phẩm",
+                        text = "Quản lý $categoryTitle",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
