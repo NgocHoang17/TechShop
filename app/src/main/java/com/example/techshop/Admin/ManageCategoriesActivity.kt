@@ -51,8 +51,9 @@ fun ManageCategoriesScreen(onBackClick: () -> Unit) {
     var newCategoryPicUrl by remember { mutableStateOf("") }
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        database.addListenerForSingleValueEvent(object : ValueEventListener {
+    // Sử dụng DisposableEffect để thiết lập listener và cập nhật dữ liệu
+    DisposableEffect(Unit) {
+        val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val categoryList = mutableListOf<CategoryModel>()
                 for (childSnapshot in snapshot.children) {
@@ -68,7 +69,13 @@ fun ManageCategoriesScreen(onBackClick: () -> Unit) {
             override fun onCancelled(error: DatabaseError) {
                 isLoading = false
             }
-        })
+        }
+        // Thêm listener để theo dõi thay đổi thời gian thực
+        database.addValueEventListener(valueEventListener)
+        // Xóa listener khi composable bị hủy để tránh rò rỉ bộ nhớ
+        onDispose {
+            database.removeEventListener(valueEventListener)
+        }
     }
 
     Scaffold(
