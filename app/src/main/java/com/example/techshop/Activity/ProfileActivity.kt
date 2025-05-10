@@ -50,8 +50,8 @@ class ProfileActivity : ComponentActivity() {
                     finishAffinity()
                 },
                 onBackClick = {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    //finish()
+                    //startActivity(Intent(this, MainActivity::class.java))
+                    finish()
                 }
             )
         }
@@ -233,7 +233,7 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
                     .height(48.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.lightGrey2),
+                    containerColor = colorResource(R.color.lightGrey),
                     contentColor = Color.Black
                 )
             ) {
@@ -255,7 +255,7 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
                     .height(48.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.lightGrey2),
+                    containerColor = colorResource(R.color.lightGrey),
                     contentColor = Color.Black
                 )
             ) {
@@ -280,7 +280,7 @@ fun ProfileScreen(onLogout: () -> Unit, onBackClick: () -> Unit) {
                         .height(48.dp),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(R.color.lightGrey2),
+                        containerColor = colorResource(R.color.lightGrey),
                         contentColor = Color.Black
                     )
                 ) {

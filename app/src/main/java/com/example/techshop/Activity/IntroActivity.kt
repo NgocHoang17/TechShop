@@ -10,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.example.techshop.Admin.AdminMainActivity
 import com.example.techshop.R
 import com.example.techshop.ui.screen.ForgotPasswordDialog
 import com.example.techshop.ui.screen.LoginScreen

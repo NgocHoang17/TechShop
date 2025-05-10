@@ -249,6 +249,7 @@ fun CartItem(
         )
         Text(
             text = item.title,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .constrainAs(titleTxt) {
                     start.linkTo(pic.end)

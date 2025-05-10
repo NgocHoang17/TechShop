@@ -179,7 +179,7 @@ fun ItemRow(
             .clickable(onClick = onItemClick),
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFDEDFE3))
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFBDC7EC))
     ) {
         Column(
             modifier = Modifier
@@ -194,7 +194,7 @@ fun ItemRow(
                     painter = rememberAsyncImagePainter(model = item.picUrl.firstOrNull()),
                     contentDescription = item.title,
                     modifier = Modifier
-                        .size(120.dp) // Tăng kích thước hình ảnh từ 80.dp lên 100.dp
+                        .size(120.dp) // kích thước hình ảnh
                         .background(
                             colorResource(R.color.lightGrey),
                             shape = RoundedCornerShape(8.dp)
@@ -236,7 +236,7 @@ fun ItemRow(
                     Text(
                         text = "${NumberFormat.getNumberInstance(Locale("vi", "VN")).format(item.price)} ₫",
                         fontSize = 14.sp,
-                        color = Color(0xFFC72216),
+                        color = colorResource(R.color.purple),
                         fontWeight = FontWeight.Bold
                     )
                 }
