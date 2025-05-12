@@ -50,7 +50,7 @@ class ProfileActivity : ComponentActivity() {
                     finishAffinity()
                 },
                 onBackClick = {
-                    //startActivity(Intent(this, MainActivity::class.java))
+                    startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 }
             )
