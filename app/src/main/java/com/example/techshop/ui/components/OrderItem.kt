@@ -8,9 +8,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.techshop.Model.OrderItemModel
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 
 @Composable
 fun OrderItem(item: OrderItemModel) {
+    val formatSymbols = DecimalFormatSymbols().apply { groupingSeparator = '.' }
+    val formatter = DecimalFormat("#,###", formatSymbols)
+
+    val totalPrice = item.price * item.numberInCart
+    val formattedPrice = formatter.format(totalPrice) + " ₫"
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -21,7 +29,7 @@ fun OrderItem(item: OrderItemModel) {
             fontWeight = FontWeight.Medium
         )
         Text(
-            text = "${item.price * item.numberInCart} ₫",
+            text = formattedPrice,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )
