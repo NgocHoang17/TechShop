@@ -24,7 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
@@ -48,14 +51,42 @@ class AddEditProductActivity : ComponentActivity() {
 
     private fun saveProduct(product: ItemsModel) {
         val database = FirebaseDatabase.getInstance().getReference("Items")
-        val productId = if (product.id.isEmpty()) database.push().key ?: "" else product.id
-        database.child(productId).setValue(product.copy(id = productId))
-            .addOnSuccessListener {
-                Toast.makeText(this, "Lưu sản phẩm thành công", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Lưu sản phẩm thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
-            }
+        val newItemId = if (product.id.isEmpty()) {
+            // Lấy ID lớn nhất hiện tại và tăng 1
+            var maxId = 0
+            database.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    for (childSnapshot in snapshot.children) {
+                        val id = childSnapshot.key?.toIntOrNull() ?: 0
+                        if (id > maxId) maxId = id
+                    }
+                    val nextId = maxId + 1
+                    database.child(nextId.toString()).setValue(product.copy(id = nextId.toString()))
+                        .addOnSuccessListener {
+                            Toast.makeText(this@AddEditProductActivity, "Lưu sản phẩm thành công", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this@AddEditProductActivity, "Lưu sản phẩm thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@AddEditProductActivity, "Lỗi tải dữ liệu: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+            "" // Trả về rỗng tạm thời, ID thực tế được xử lý trong listener
+        } else {
+            product.id
+        }
+        if (product.id.isNotEmpty()) {
+            database.child(product.id).setValue(product)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Lưu sản phẩm thành công", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Lưu sản phẩm thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
     }
 }
 
@@ -76,7 +107,8 @@ fun AddEditProductScreen(
     var categoryIdState by remember { mutableStateOf(product?.categoryId ?: (categoryId ?: "")) }
     var rating by remember { mutableStateOf(product?.rating?.toString() ?: "") }
     var showRecommended by remember { mutableStateOf(product?.showRecommended ?: false) }
-    var imageUrl by remember { mutableStateOf(if (product?.picUrl?.isNotEmpty() == true) product.picUrl[0] else "") }
+    var imageUrls by remember { mutableStateOf(product?.picUrl?.joinToString(", ") ?: "") }
+    var models by remember { mutableStateOf(product?.model?.joinToString(", ") ?: "") }
 
     Scaffold(
         topBar = {
@@ -153,10 +185,18 @@ fun AddEditProductScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
-                value = imageUrl,
-                onValueChange = { imageUrl = it },
-                label = { Text("URL ảnh") },
-                modifier = Modifier.fillMaxWidth()
+                value = imageUrls,
+                onValueChange = { imageUrls = it },
+                label = { Text("URL ảnh (tách bằng dấu phẩy)") },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("VD: url1, url2, url3") }
+            )
+            OutlinedTextField(
+                value = models,
+                onValueChange = { models = it },
+                label = { Text("Model (tách bằng dấu phẩy)") },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("VD: Model 1, Model 2") }
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -168,37 +208,41 @@ fun AddEditProductScreen(
                 )
                 Text("Hiển thị trong đề xuất")
             }
-            Button(
-                onClick = {
-                    val parsedPrice = price.replace(".", "").toDoubleOrNull() ?: 0.0
-                    val newProduct = ItemsModel(
-                        id = product?.id ?: "",
-                        title = title,
-                        description = description,
-                        price = parsedPrice,
-                        categoryId = categoryIdState,
-                        rating = rating.toDoubleOrNull() ?: 0.0,
-                        showRecommended = showRecommended,
-                        picUrl = if (imageUrl.isNotEmpty()) arrayListOf(imageUrl) else arrayListOf(),
-                        model = product?.model ?: arrayListOf()
+                Button(
+                    onClick = {
+                        val parsedPrice = price.replace(".", "").toDoubleOrNull() ?: 0.0
+                        val modelList =
+                            models.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                        val imageUrlList =
+                            imageUrls.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                        val newProduct = ItemsModel(
+                            id = product?.id ?: "",
+                            title = title,
+                            description = description,
+                            price = parsedPrice,
+                            categoryId = categoryIdState,
+                            rating = rating.toDoubleOrNull() ?: 0.0,
+                            showRecommended = showRecommended,
+                            picUrl = if (imageUrlList.isNotEmpty()) ArrayList(imageUrlList) else ArrayList(),
+                            model = if (modelList.isNotEmpty()) ArrayList(modelList) else ArrayList()
+                        )
+                        onSave(newProduct)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.purple),
+                        contentColor = Color.White
                     )
-                    onSave(newProduct)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(R.color.purple),
-                    contentColor = Color.White
-                )
-            ) {
-                Text(
-                    text = "Lưu",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                ) {
+                    Text(
+                        text = "Lưu",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
-}
