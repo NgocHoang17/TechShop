@@ -50,6 +50,8 @@ fun ManageCategoriesScreen(onBackClick: () -> Unit) {
     var isLoading by remember { mutableStateOf(true) }
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var showEditCategoryDialog by remember { mutableStateOf(false) }
+    var showDeleteCategoryDialog by remember { mutableStateOf(false) } // Trạng thái hiển thị dialog xóa
+    var categoryToDelete by remember { mutableStateOf<CategoryModel?>(null) } // Lưu danh mục cần xóa
     var newCategoryTitle by remember { mutableStateOf("") }
     var newCategoryId by remember { mutableStateOf("") }
     var newCategoryPicUrl by remember { mutableStateOf("") }
@@ -151,7 +153,8 @@ fun ManageCategoriesScreen(onBackClick: () -> Unit) {
                                 context.startActivity(intent)
                             },
                             onDelete = {
-                                categoryRef.child(category.id.toString()).removeValue()
+                                categoryToDelete = category
+                                showDeleteCategoryDialog = true
                             },
                             onEdit = {
                                 editCategory = category
@@ -294,6 +297,45 @@ fun ManageCategoriesScreen(onBackClick: () -> Unit) {
             },
             dismissButton = {
                 TextButton(onClick = { showEditCategoryDialog = false }) {
+                    Text("Hủy")
+                }
+            }
+        )
+    }
+
+    // Dialog xác nhận xóa danh mục
+    if (showDeleteCategoryDialog && categoryToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteCategoryDialog = false },
+            title = { Text("Xác nhận xóa", fontWeight = FontWeight.Bold) },
+            text = { Text("Bạn có chắc chắn muốn xóa danh mục '${categoryToDelete?.title}' không?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        categoryRef.child(categoryToDelete?.id.toString()).removeValue()
+                            .addOnSuccessListener {
+                                Toast.makeText(context, "Xóa danh mục thành công", Toast.LENGTH_SHORT).show()
+                                showDeleteCategoryDialog = false
+                                categoryToDelete = null
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(context, "Xóa danh mục thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
+                                showDeleteCategoryDialog = false
+                            }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.purple),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Xóa")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDeleteCategoryDialog = false
+                    categoryToDelete = null
+                }) {
                     Text("Hủy")
                 }
             }
