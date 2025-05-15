@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -33,7 +32,6 @@ import com.example.techshop.Helper.FavoriteManager
 import com.example.techshop.Helper.ManagmentCart
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
-import com.example.techshop.utils.toVND
 import com.google.firebase.auth.FirebaseAuth
 import java.text.NumberFormat
 import java.util.Locale
@@ -57,6 +55,7 @@ class FavoriteActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoriteScreen() {
+    // Lấy danh sách sản phẩm yêu thích từ FavoriteManager (StateFlow)
     val favoriteItems by FavoriteManager.favoriteItems.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val managmentCart = remember { ManagmentCart(context) }

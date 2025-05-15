@@ -53,7 +53,7 @@ fun PaymentScreen(cartItems: ArrayList<ItemsModel>, total: Double) {
     val address = remember { mutableStateOf(TextFieldValue()) }
     val phone = remember { mutableStateOf(TextFieldValue()) }
     val selectedMethod = remember { mutableStateOf("Thanh toán khi nhận hàng") }
-    val methods = listOf("Thanh toán khi nhận hàng", "Chuyển khoản ngân hàng", "Momo")
+    val methods = listOf("Thanh toán khi nhận hàng", "ZaloPay", "Momo")
     var expanded by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }

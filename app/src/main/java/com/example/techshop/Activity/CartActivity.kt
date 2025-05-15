@@ -32,7 +32,6 @@ import com.example.techshop.Helper.ManagmentCart
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
 import com.example.techshop.utils.toVND
-import java.text.NumberFormat
 import java.util.*
 
 class CartActivity : BaseActivity() {
@@ -48,6 +47,7 @@ class CartActivity : BaseActivity() {
     }
 }
 
+// Giao diện giỏ hàng
 @Composable
 private fun CartScreen(
     managmentCart: ManagmentCart = ManagmentCart(LocalContext.current),
@@ -99,6 +99,7 @@ private fun CartScreen(
                 calculatorCart(managmentCart, tax)
             }
 
+            //Hiển thị tổng tiền và nút thanh toán
             CartSummary(
                 itemTotal = managmentCart.getTotalFee(),
                 tax = tax.value,
@@ -110,6 +111,7 @@ private fun CartScreen(
     }
 }
 
+// Hàm hiển thị tổng kết giỏ hàng và nút thanh toán
 @Composable
 fun CartSummary(
     itemTotal: Double,
@@ -196,11 +198,13 @@ fun CartSummary(
     }
 }
 
+// Hàm tính thuế(2%)
 fun calculatorCart(managmentCart: ManagmentCart, tax: MutableState<Double>) {
     val percentTax = 0.02
     tax.value = Math.round((managmentCart.getTotalFee() * percentTax) * 100) / 100.0
 }
 
+// Hiển thị danh sách sp trong giỏ
 @Composable
 fun CartList(
     cartItems: ArrayList<ItemsModel>,
@@ -219,6 +223,7 @@ fun CartList(
     }
 }
 
+// Hiển thị từng sp trong giỏ
 @Composable
 fun CartItem(
     cartItems: ArrayList<ItemsModel>,

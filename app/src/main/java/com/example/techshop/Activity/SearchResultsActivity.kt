@@ -193,13 +193,13 @@ fun SearchResultsScreen() {
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(70.dp)
+                            .height(50.dp)
                     ) {
                         item {
                             FilterChip(
                                 selected = tempSortByPrice == SortOption.ASCENDING,
                                 onClick = { tempSortByPrice = SortOption.ASCENDING },
-                                label = { Text("Thấp đến cao", fontSize = 12.sp) },
+                                label = { Text("A - Z", fontSize = 12.sp) },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .shadow(
@@ -219,7 +219,7 @@ fun SearchResultsScreen() {
                             FilterChip(
                                 selected = tempSortByPrice == SortOption.DESCENDING,
                                 onClick = { tempSortByPrice = SortOption.DESCENDING },
-                                label = { Text("Cao đến thấp", fontSize = 12.sp) },
+                                label = { Text("Z - A", fontSize = 12.sp) },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .shadow(
@@ -270,13 +270,13 @@ fun SearchResultsScreen() {
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(70.dp)
+                            .height(50.dp)
                     ) {
                         item {
                             FilterChip(
                                 selected = tempSortByRating == SortOption.ASCENDING,
                                 onClick = { tempSortByRating = SortOption.ASCENDING },
-                                label = { Text("Thấp đến cao", fontSize = 12.sp) },
+                                label = { Text("A - Z", fontSize = 12.sp) },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .shadow(
@@ -296,7 +296,7 @@ fun SearchResultsScreen() {
                             FilterChip(
                                 selected = tempSortByRating == SortOption.DESCENDING,
                                 onClick = { tempSortByRating = SortOption.DESCENDING },
-                                label = { Text("Cao đến thấp", fontSize = 12.sp) },
+                                label = { Text("Z - A", fontSize = 12.sp) },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .shadow(

@@ -64,6 +64,7 @@ class DetailActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Nhận dữ liệu từ intent truyền từ màn hình trước
         item = intent.getParcelableExtra("object")!!
 
         managmentCart = ManagmentCart(this)
@@ -129,6 +130,7 @@ fun DetailScreen(
                         start.linkTo(parent.start)
                     }
             )
+
             IconButton(
                 onClick = onFavoriteClick,
                 modifier = Modifier
@@ -145,6 +147,7 @@ fun DetailScreen(
                 )
             }
         }
+
         Image(
             painter = rememberAsyncImagePainter(model = selectedImageUrl),
             contentDescription = null,
@@ -231,6 +234,7 @@ fun DetailScreen(
     }
 }
 
+// Hiển thị rating
 @Composable
 fun RatingBar(rating: Double) {
     Row(
@@ -251,6 +255,7 @@ fun RatingBar(rating: Double) {
     }
 }
 
+// Chọn model sp
 @Composable
 fun ModelSelector(
     models: List<String>,
@@ -294,6 +299,7 @@ fun ModelSelector(
     }
 }
 
+// Hiển thị ảnh thu nhỏ
 @Composable
 fun ImageThumbnail(
     imageUrl: String,

@@ -20,7 +20,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.techshop.Helper.FavoriteManager
 import com.example.techshop.Model.ItemsModel
 import com.example.techshop.R
 

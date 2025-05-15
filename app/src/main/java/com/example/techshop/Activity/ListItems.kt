@@ -48,7 +48,7 @@ import java.util.Locale
 @Composable
 fun ListItems(items: List<ItemsModel>) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Fixed(2), // 2 cột
         modifier = Modifier
             .height(500.dp)
             .padding(start = 8.dp, end = 8.dp),
