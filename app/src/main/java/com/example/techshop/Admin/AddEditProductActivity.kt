@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,6 +45,10 @@ class AddEditProductActivity : ComponentActivity() {
                 onSave = { updatedProduct ->
                     saveProduct(updatedProduct)
                     finish()
+                },
+                onDelete = { productToDelete ->
+                    deleteProduct(productToDelete)
+                    finish()
                 }
             )
         }
@@ -52,7 +57,6 @@ class AddEditProductActivity : ComponentActivity() {
     private fun saveProduct(product: ItemsModel) {
         val database = FirebaseDatabase.getInstance().getReference("Items")
         val newItemId = if (product.id.isEmpty()) {
-            // Lấy ID lớn nhất hiện tại và tăng 1
             var maxId = 0
             database.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -74,7 +78,7 @@ class AddEditProductActivity : ComponentActivity() {
                     Toast.makeText(this@AddEditProductActivity, "Lỗi tải dữ liệu: ${error.message}", Toast.LENGTH_SHORT).show()
                 }
             })
-            "" // Trả về rỗng tạm thời, ID thực tế được xử lý trong listener
+            ""
         } else {
             product.id
         }
@@ -88,6 +92,21 @@ class AddEditProductActivity : ComponentActivity() {
                 }
         }
     }
+
+    private fun deleteProduct(product: ItemsModel?) {
+        if (product?.id?.isNotEmpty() == true) {
+            val database = FirebaseDatabase.getInstance().getReference("Items")
+            database.child(product.id).removeValue()
+                .addOnSuccessListener {
+                    Toast.makeText(this@AddEditProductActivity, "Xóa sản phẩm thành công", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this@AddEditProductActivity, "Xóa sản phẩm thất bại: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            Toast.makeText(this@AddEditProductActivity, "Không thể xóa sản phẩm: ID không hợp lệ", Toast.LENGTH_SHORT).show()
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,7 +115,8 @@ fun AddEditProductScreen(
     product: ItemsModel?,
     categoryId: String?,
     onBackClick: () -> Unit,
-    onSave: (ItemsModel) -> Unit
+    onSave: (ItemsModel) -> Unit,
+    onDelete: (ItemsModel?) -> Unit
 ) {
     val formatSymbols = DecimalFormatSymbols().apply { groupingSeparator = '.' }
     val formatter = DecimalFormat("#,###", formatSymbols)
@@ -109,6 +129,33 @@ fun AddEditProductScreen(
     var showRecommended by remember { mutableStateOf(product?.showRecommended ?: false) }
     var imageUrls by remember { mutableStateOf(product?.picUrl?.joinToString(", ") ?: "") }
     var models by remember { mutableStateOf(product?.model?.joinToString(", ") ?: "") }
+    var showDeleteDialog by remember { mutableStateOf(false) } // Trạng thái hiển thị dialog xác nhận xóa
+
+    // Hiển thị dialog xác nhận xóa
+    if (showDeleteDialog && product != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Xác nhận xóa") },
+            text = { Text("Bạn có chắc chắn muốn xóa sản phẩm '${product.title}' không?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDelete(product)
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text("Xóa")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false }
+                ) {
+                    Text("Hủy")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -130,6 +177,17 @@ fun AddEditProductScreen(
                             contentDescription = "Quay lại",
                             tint = Color.White
                         )
+                    }
+                },
+                actions = {
+                    if (product != null) {
+                        IconButton(onClick = { showDeleteDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "Xóa sản phẩm",
+                                tint = Color.White
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -175,7 +233,7 @@ fun AddEditProductScreen(
                 onValueChange = { categoryIdState = it },
                 label = { Text("ID danh mục") },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = product == null && categoryId != null // Chỉ cho phép chỉnh sửa nếu là sản phẩm mới
+                enabled = product == null && categoryId != null
             )
             OutlinedTextField(
                 value = rating,
@@ -208,41 +266,39 @@ fun AddEditProductScreen(
                 )
                 Text("Hiển thị trong đề xuất")
             }
-                Button(
-                    onClick = {
-                        val parsedPrice = price.replace(".", "").toDoubleOrNull() ?: 0.0
-                        val modelList =
-                            models.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-                        val imageUrlList =
-                            imageUrls.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-                        val newProduct = ItemsModel(
-                            id = product?.id ?: "",
-                            title = title,
-                            description = description,
-                            price = parsedPrice,
-                            categoryId = categoryIdState,
-                            rating = rating.toDoubleOrNull() ?: 0.0,
-                            showRecommended = showRecommended,
-                            picUrl = if (imageUrlList.isNotEmpty()) ArrayList(imageUrlList) else ArrayList(),
-                            model = if (modelList.isNotEmpty()) ArrayList(modelList) else ArrayList()
-                        )
-                        onSave(newProduct)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(R.color.purple),
-                        contentColor = Color.White
+            Button(
+                onClick = {
+                    val parsedPrice = price.replace(".", "").toDoubleOrNull() ?: 0.0
+                    val modelList = models.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                    val imageUrlList = imageUrls.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                    val newProduct = ItemsModel(
+                        id = product?.id ?: "",
+                        title = title,
+                        description = description,
+                        price = parsedPrice,
+                        categoryId = categoryIdState,
+                        rating = rating.toDoubleOrNull() ?: 0.0,
+                        showRecommended = showRecommended,
+                        picUrl = if (imageUrlList.isNotEmpty()) ArrayList(imageUrlList) else ArrayList(),
+                        model = if (modelList.isNotEmpty()) ArrayList(modelList) else ArrayList()
                     )
-                ) {
-                    Text(
-                        text = "Lưu",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                    onSave(newProduct)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.purple),
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "Lưu",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
+}
