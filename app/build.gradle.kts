@@ -75,6 +75,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 
     testImplementation(libs.junit)

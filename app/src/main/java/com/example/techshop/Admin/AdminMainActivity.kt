@@ -43,6 +43,9 @@ class AdminMainActivity : ComponentActivity() {
                 onManageUsers = {
                     startActivity(Intent(this, ManageUsersActivity::class.java))
                 },
+                onStatistics = { // Thêm callback cho thống kê
+                    startActivity(Intent(this, StatisticsActivity::class.java))
+                },
                 onBackClick = {
                     startActivity(Intent(this, ProfileActivity::class.java))
                     finish()
@@ -59,6 +62,7 @@ fun AdminMainScreen(
     onManageOrders: () -> Unit,
     onManageCategories: () -> Unit,
     onManageUsers: () -> Unit,
+    onStatistics: () -> Unit, // Thêm callback cho thống kê
     onBackClick: () -> Unit
 ) {
     Scaffold(
@@ -103,6 +107,7 @@ fun AdminMainScreen(
             AdminOptionCard("Quản lý danh mục & sản phẩm", onClick = onManageCategories)
             AdminOptionCard("Quản lý đơn hàng", onClick = onManageOrders)
             AdminOptionCard("Quản lý người dùng", onClick = onManageUsers)
+            AdminOptionCard("Thống kê", onClick = onStatistics) // Thêm tùy chọn thống kê
 
             Spacer(modifier = Modifier.weight(1f))
 

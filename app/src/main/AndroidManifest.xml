@@ -16,6 +16,9 @@
         android:theme="@style/Theme.TechShop"
         tools:targetApi="31">
         <activity
+            android:name=".Admin.StatisticsActivity"
+            android:exported="false" />
+        <activity
             android:name=".Admin.ManageProductsByCategoryActivity"
             android:exported="false" />
         <activity
