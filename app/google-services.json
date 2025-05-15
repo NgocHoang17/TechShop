@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "889503713064",
+    "firebase_url": "https://techshop-e405f-default-rtdb.firebaseio.com",
     "project_id": "techshop-e405f",
     "storage_bucket": "techshop-e405f.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.example.techshop"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "889503713064-a8hg0bt6vra481g90f3gibu1pafk81kf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.techshop",
+            "certificate_hash": "8f2009a5dd7dc082475c3e4dc142e31f4f3aeda6"
+          }
+        },
+        {
+          "client_id": "889503713064-44q4e5dq1ie6bjk0s9crrfos60143khr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAdetksj40HmxDKqw-rmwqf-jMo5fbEjhw"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "889503713064-44q4e5dq1ie6bjk0s9crrfos60143khr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
