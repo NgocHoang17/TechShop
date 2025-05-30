@@ -111,6 +111,6 @@ Chúng tôi rất hoan nghênh mọi đóng góp từ cộng đồng. Nếu bạ
 ---
 
 <div align="center">
-  Made with ❤️ by Ngọc Hoàng
+  Made by ❤️ Ngọc Hoàng
 </div>
 
