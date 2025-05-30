@@ -1,8 +1,5 @@
 # 🛍️ Ecommerce - TechShop
 
-<div align="center">
-  <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" alt="TechShop Logo" width="150"/>
-</div>
 
 ## 📖 Giới thiệu
 
@@ -88,7 +85,12 @@ git clone https://github.com/NgocHoang17/techshop.git
 
 ## 📱 Screenshots
 
-[Thêm screenshots của ứng dụng ở đây]
+<img src="https://github.com/user-attachments/assets/46ee082a-4dc3-44c0-90f8-a0f137cb8b9e" width="150" style="margin-right: 100px;"/>
+<img src="https://github.com/user-attachments/assets/0100041c-9b27-403c-b013-88e98d6c31e1" width="150" style="margin-right: 100px;"/>
+<img src="https://github.com/user-attachments/assets/75be03d9-4173-4f82-9c57-e6d3828211d9" width="150" style="margin-right: 100px;"/>
+<img src="https://github.com/user-attachments/assets/005bf2c4-0e24-4d79-bdb0-732f64e30d2d" width="150"/>
+
+
 
 ## 👥 Đóng góp
 
